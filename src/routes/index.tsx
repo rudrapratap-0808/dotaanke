@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, ShieldCheck, Truck, RefreshCcw } from "lucide-react";
-import heroImg from "@/assets/hero.jpg";
+import heroVideo from "@/assets/hero.mp4.asset.json";
 import craftImg from "@/assets/craft.jpg";
 import { productsQuery } from "@/lib/api";
 import { ProductCard } from "@/components/ProductCard";
