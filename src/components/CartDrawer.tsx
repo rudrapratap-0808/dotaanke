@@ -3,15 +3,15 @@ import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useStore, COUPON_DISCOUNTS } from "@/lib/store";
+import { useStore } from "@/lib/store";
 
 export function CartDrawer() {
   const { isCartOpen, closeCart, cart, subtotal, updateQuantity, removeItem, coupon, applyCoupon, clearCoupon } =
     useStore();
   const [code, setCode] = useState("");
+  const [applying, setApplying] = useState(false);
 
-  const discountRate = coupon ? COUPON_DISCOUNTS[coupon] ?? 0 : 0;
-  const discount = Math.round(subtotal * discountRate);
+  const discount = coupon ? Math.round((subtotal * coupon.percent) / 100) : 0;
   const total = subtotal - discount;
 
   return (
@@ -98,15 +98,18 @@ export function CartDrawer() {
                     <input
                       value={code}
                       onChange={(e) => setCode(e.target.value)}
-                      placeholder="Coupon (try WELCOME10)"
+                      placeholder="Coupon code"
                       className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
                     />
                     <button
-                      onClick={() => {
+                      disabled={applying}
+                      onClick={async () => {
                         if (!code) return;
-                        const res = applyCoupon(code);
+                        setApplying(true);
+                        const res = await applyCoupon(code);
+                        setApplying(false);
                         res.ok ? toast.success(res.message) : toast.error(res.message);
-                        setCode("");
+                        if (res.ok) setCode("");
                       }}
                       className="btn-ghost text-xs"
                     >
@@ -115,7 +118,7 @@ export function CartDrawer() {
                   </div>
                   {coupon && (
                     <div className="mb-3 flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">Coupon {coupon}</span>
+                      <span className="text-muted-foreground">Coupon {coupon.code} — {coupon.percent}% off</span>
                       <button onClick={clearCoupon} className="text-primary underline">Remove</button>
                     </div>
                   )}

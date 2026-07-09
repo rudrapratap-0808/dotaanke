@@ -3,13 +3,14 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Heart, Minus, Plus, Share2, ShieldCheck, Truck } from "lucide-react";
 import { toast } from "sonner";
-import { findProduct, products } from "@/lib/products";
+import { productBySlugQuery, productsQuery } from "@/lib/api";
 import { useStore } from "@/lib/store";
 import { ProductCard } from "@/components/ProductCard";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/product/$id")({
-  loader: ({ params }) => {
-    const product = findProduct(params.id);
+  loader: async ({ params, context }) => {
+    const product = await context.queryClient.ensureQueryData(productBySlugQuery(params.id));
     if (!product) throw notFound();
     return { product };
   },
@@ -28,25 +29,29 @@ export const Route = createFileRoute("/product/$id")({
 });
 
 function ProductPage() {
-  const { product } = Route.useLoaderData() as { product: import("@/lib/products").Product };
+  const { id } = Route.useParams();
+  const { data: product } = useSuspenseQuery(productBySlugQuery(id));
+  const { data: allProducts } = useSuspenseQuery(productsQuery());
   const [size, setSize] = useState("M");
   const [qty, setQty] = useState(1);
   const [active, setActive] = useState(0);
   const [zoom, setZoom] = useState({ x: 50, y: 50, on: false });
   const { addToCart, openCart, wishlist, toggleWishlist, addRecentlyViewed } = useStore();
   const navigate = useNavigate();
+
+  if (!product) return null;
   const wished = wishlist.includes(product.id);
 
   useEffect(() => { addRecentlyViewed(product.id); }, [product.id, addRecentlyViewed]);
 
-  const related = products.filter((p) => p.id !== product.id).slice(0, 4);
+  const related = allProducts.filter((p) => p.id !== product.id).slice(0, 4);
 
   const add = () => {
-    addToCart({ productId: product.id, name: product.name, price: product.price, image: product.image, size, quantity: qty });
+    addToCart({ productId: product.id, slug: product.slug, name: product.name, price: product.price, image: product.image, size, quantity: qty });
     openCart();
   };
   const buyNow = () => {
-    addToCart({ productId: product.id, name: product.name, price: product.price, image: product.image, size, quantity: qty });
+    addToCart({ productId: product.id, slug: product.slug, name: product.name, price: product.price, image: product.image, size, quantity: qty });
     navigate({ to: "/checkout" });
   };
 
@@ -67,19 +72,24 @@ function ProductPage() {
             onMouseLeave={() => setZoom((z) => ({ ...z, on: false }))}
           >
             <img
-              src={product.gallery[active]}
+              src={product.gallery[active] ?? product.image}
               alt={product.name}
               className="h-full w-full object-cover transition-transform duration-500"
               style={zoom.on ? { transform: "scale(1.6)", transformOrigin: `${zoom.x}% ${zoom.y}%` } : undefined}
             />
           </div>
-          <div className="grid grid-cols-4 gap-3">
-            {product.gallery.map((g, i) => (
-              <button key={i} onClick={() => setActive(i)} className={`aspect-square overflow-hidden rounded-md border ${active === i ? "border-primary" : "border-border"}`}>
-                <img src={g} alt="" className="h-full w-full object-cover" loading="lazy" />
-              </button>
-            ))}
-          </div>
+          {product.gallery.length > 1 && (
+            <div className="grid grid-cols-4 gap-3">
+              {product.gallery.map((g, i) => (
+                <button key={i} onClick={() => setActive(i)} className={`aspect-square overflow-hidden rounded-md border ${active === i ? "border-primary" : "border-border"}`}>
+                  <img src={g} alt="" className="h-full w-full object-cover" loading="lazy" />
+                </button>
+              ))}
+            </div>
+          )}
+          {product.video && (
+            <video src={product.video} controls className="w-full rounded-2xl" />
+          )}
         </div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
@@ -99,7 +109,6 @@ function ProductPage() {
           <div className="mt-8">
             <div className="mb-3 flex items-center justify-between">
               <p className="eyebrow">Size</p>
-              <button className="text-xs text-muted-foreground underline">Size guide</button>
             </div>
             <div className="flex flex-wrap gap-2">
               {product.sizes.map((s) => (
@@ -124,8 +133,8 @@ function ProductPage() {
           <div className="mt-6 flex flex-wrap gap-3">
             <button
               onClick={() => {
-                if (navigator.share) navigator.share({ title: product.name, url: window.location.href }).catch(() => {});
-                else { navigator.clipboard.writeText(window.location.href); toast.success("Link copied"); }
+                if (typeof navigator !== "undefined" && navigator.share) navigator.share({ title: product.name, url: window.location.href }).catch(() => {});
+                else if (typeof navigator !== "undefined") { navigator.clipboard.writeText(window.location.href); toast.success("Link copied"); }
               }}
               className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"
             >
@@ -133,13 +142,15 @@ function ProductPage() {
             </button>
           </div>
 
-          <ul className="mt-8 grid grid-cols-2 gap-3 text-sm">
-            {product.features.map((f) => (
-              <li key={f} className="flex items-center gap-2 text-foreground/80">
-                <ShieldCheck className="h-4 w-4 text-gold" /> {f}
-              </li>
-            ))}
-          </ul>
+          {product.features.length > 0 && (
+            <ul className="mt-8 grid grid-cols-2 gap-3 text-sm">
+              {product.features.map((f) => (
+                <li key={f} className="flex items-center gap-2 text-foreground/80">
+                  <ShieldCheck className="h-4 w-4 text-gold" /> {f}
+                </li>
+              ))}
+            </ul>
+          )}
 
           <div className="mt-6 flex gap-6 border-t border-border pt-6 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-2"><Truck className="h-4 w-4" /> Ships in 2-3 days</span>
@@ -148,29 +159,14 @@ function ProductPage() {
         </motion.div>
       </div>
 
-      <section className="mt-24">
-        <h2 className="font-serif text-3xl">Reviews</h2>
-        <div className="mt-6 grid gap-6 md:grid-cols-3">
-          {[
-            { n: "Priya M.", t: "Beyond expectations. The embroidery quality is heirloom." },
-            { n: "Aditya R.", t: "Fits perfectly. Compliments all evening." },
-            { n: "Sneha J.", t: "So elegant. Will be ordering more colours." },
-          ].map((r) => (
-            <div key={r.n} className="rounded-2xl bg-cream p-6">
-              <div className="text-gold">★★★★★</div>
-              <p className="mt-3 font-serif text-lg">"{r.t}"</p>
-              <p className="mt-3 text-xs text-muted-foreground">— {r.n}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="mt-24">
-        <h2 className="font-serif text-3xl">You may also love</h2>
-        <div className="mt-8 grid grid-cols-2 gap-5 md:grid-cols-4 md:gap-8">
-          {related.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
-        </div>
-      </section>
+      {related.length > 0 && (
+        <section className="mt-24">
+          <h2 className="font-serif text-3xl">You may also love</h2>
+          <div className="mt-8 grid grid-cols-2 gap-5 md:grid-cols-4 md:gap-8">
+            {related.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+          </div>
+        </section>
+      )}
     </section>
   );
 }

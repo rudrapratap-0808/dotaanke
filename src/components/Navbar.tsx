@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Menu, Moon, Search, ShoppingBag, Sun, User, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
+import { useAuth } from "@/lib/auth";
 
 const links = [
   { to: "/", label: "Home" },
@@ -86,12 +87,7 @@ export function Navbar() {
                 <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-primary" />
               )}
             </Link>
-            <button
-              aria-label="Account"
-              className="hidden rounded-full p-2 text-foreground/80 transition-colors hover:bg-muted hover:text-foreground md:inline-flex"
-            >
-              <User className="h-[18px] w-[18px]" />
-            </button>
+            <AccountButton />
             <button
               onClick={openCart}
               aria-label="Open cart"
