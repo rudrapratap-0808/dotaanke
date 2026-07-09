@@ -13,6 +13,7 @@ import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { StoreProvider } from "@/lib/store";
+import { AuthProvider } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
@@ -106,15 +107,17 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <StoreProvider>
-        <Navbar />
-        <main className="pt-20">
-          <Outlet />
-        </main>
-        <Footer />
-        <CartDrawer />
-        <Toaster position="top-center" richColors closeButton />
-      </StoreProvider>
+      <AuthProvider>
+        <StoreProvider>
+          <Navbar />
+          <main className="pt-20">
+            <Outlet />
+          </main>
+          <Footer />
+          <CartDrawer />
+          <Toaster position="top-center" richColors closeButton />
+        </StoreProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

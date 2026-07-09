@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
-import { products } from "@/lib/products";
+import { productsQuery } from "@/lib/api";
 import { ProductCard } from "@/components/ProductCard";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/shop")({
   head: () => ({
@@ -11,14 +12,16 @@ export const Route = createFileRoute("/shop")({
       { name: "description", content: "Shop hand-embroidered shirts and kurtis. Filter by size, category and price." },
     ],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(productsQuery()),
   component: Shop,
 });
 
 function Shop() {
+  const { data: products } = useSuspenseQuery(productsQuery());
   const [q, setQ] = useState("");
-  const [category, setCategory] = useState<"All" | "Shirts" | "Kurtis">("All");
+  const [category, setCategory] = useState<string>("All");
   const [size, setSize] = useState<string>("All");
-  const [price, setPrice] = useState<number>(1500);
+  const [price, setPrice] = useState<number>(3000);
   const [sort, setSort] = useState<"featured" | "low" | "high" | "new">("featured");
 
   const filtered = useMemo(() => {
@@ -31,9 +34,9 @@ function Shop() {
     });
     if (sort === "low") list = [...list].sort((a, b) => a.price - b.price);
     if (sort === "high") list = [...list].sort((a, b) => b.price - a.price);
-    if (sort === "new") list = [...list].sort((a, b) => Number(!!b.newArrival) - Number(!!a.newArrival));
+    if (sort === "new") list = [...list].sort((a, b) => Number(b.newArrival) - Number(a.newArrival));
     return list;
-  }, [q, category, size, price, sort]);
+  }, [q, category, size, price, sort, products]);
 
   return (
     <section className="mx-auto max-w-7xl px-5 py-16 md:px-10">
@@ -53,7 +56,7 @@ function Shop() {
           </div>
 
           <Filter title="Category">
-            {(["All", "Shirts", "Kurtis"] as const).map((c) => (
+            {["All", "Shirts", "Kurtis"].map((c) => (
               <button key={c} onClick={() => setCategory(c)} className={`block text-left text-sm ${category === c ? "text-primary" : "text-foreground/70 hover:text-foreground"}`}>{c}</button>
             ))}
           </Filter>
@@ -67,7 +70,7 @@ function Shop() {
           </Filter>
 
           <Filter title={`Price · up to ₹${price}`}>
-            <input type="range" min={500} max={2000} step={50} value={price} onChange={(e) => setPrice(Number(e.target.value))} className="w-full accent-primary" />
+            <input type="range" min={500} max={5000} step={100} value={price} onChange={(e) => setPrice(Number(e.target.value))} className="w-full accent-primary" />
           </Filter>
 
           <Filter title="Sort">

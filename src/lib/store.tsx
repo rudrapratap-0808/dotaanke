@@ -1,33 +1,14 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { fetchCouponByCode } from "@/lib/api";
 
 export type CartItem = {
   productId: string;
+  slug: string;
   name: string;
   price: number;
   image: string;
   size: string;
   quantity: number;
-};
-
-export type Order = {
-  id: string;
-  txnId: string;
-  createdAt: string;
-  customer: {
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    city: string;
-    state: string;
-    pincode: string;
-  };
-  items: CartItem[];
-  subtotal: number;
-  total: number;
-  couponCode?: string;
-  discount: number;
-  paymentStatus: "PAID_DEMO";
 };
 
 type StoreContextValue = {
@@ -45,25 +26,21 @@ type StoreContextValue = {
   toggleWishlist: (id: string) => void;
   recentlyViewed: string[];
   addRecentlyViewed: (id: string) => void;
-  orders: Order[];
-  addOrder: (order: Order) => void;
-  coupon: string | null;
-  applyCoupon: (code: string) => { ok: boolean; message: string; discount: number };
+  coupon: { code: string; percent: number } | null;
+  applyCoupon: (code: string) => Promise<{ ok: boolean; message: string }>;
   clearCoupon: () => void;
   theme: "light" | "dark";
   toggleTheme: () => void;
 };
 
 const StoreContext = createContext<StoreContextValue | null>(null);
-
-const KEY = "do-taanke-store-v1";
+const KEY = "do-taanke-store-v2";
 
 type Persisted = {
   cart: CartItem[];
   wishlist: string[];
   recentlyViewed: string[];
-  orders: Order[];
-  coupon: string | null;
+  coupon: { code: string; percent: number } | null;
   theme: "light" | "dark";
 };
 
@@ -71,7 +48,6 @@ const initial: Persisted = {
   cart: [],
   wishlist: [],
   recentlyViewed: [],
-  orders: [],
   coupon: null,
   theme: "light",
 };
@@ -111,7 +87,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             return {
               ...s,
               cart: s.cart.map((c) =>
-                c === existing ? { ...c, quantity: c.quantity + item.quantity } : c
+                c === existing ? { ...c, quantity: c.quantity + item.quantity } : c,
               ),
             };
           }
@@ -125,7 +101,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             .filter((c) => c.quantity > 0),
         })),
       removeItem: (productId, size) =>
-        setState((s) => ({ ...s, cart: s.cart.filter((c) => !(c.productId === productId && c.size === size)) })),
+        setState((s) => ({
+          ...s,
+          cart: s.cart.filter((c) => !(c.productId === productId && c.size === size)),
+        })),
       clearCart: () => setState((s) => ({ ...s, cart: [], coupon: null })),
       isCartOpen,
       openCart: () => setCartOpen(true),
@@ -142,15 +121,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           ...s,
           recentlyViewed: [id, ...s.recentlyViewed.filter((x) => x !== id)].slice(0, 6),
         })),
-      orders: state.orders,
-      addOrder: (order) => setState((s) => ({ ...s, orders: [order, ...s.orders] })),
       coupon: state.coupon,
-      applyCoupon: (code) => {
+      applyCoupon: async (code) => {
         const c = code.trim().toUpperCase();
-        const table: Record<string, number> = { WELCOME10: 0.1, STITCH20: 0.2, GOLD5: 0.05 };
-        if (!table[c]) return { ok: false, message: "Invalid code", discount: 0 };
-        setState((s) => ({ ...s, coupon: c }));
-        return { ok: true, message: `${Math.round(table[c] * 100)}% off applied`, discount: table[c] };
+        if (!c) return { ok: false, message: "Enter a code" };
+        try {
+          const row = await fetchCouponByCode(c);
+          if (!row) return { ok: false, message: "Invalid or expired code" };
+          setState((s) => ({ ...s, coupon: { code: row.code, percent: row.discount_percent } }));
+          return { ok: true, message: `${row.discount_percent}% off applied` };
+        } catch {
+          return { ok: false, message: "Could not check coupon" };
+        }
       },
       clearCoupon: () => setState((s) => ({ ...s, coupon: null })),
       theme: state.theme,
@@ -166,5 +148,3 @@ export function useStore() {
   if (!ctx) throw new Error("useStore must be used inside StoreProvider");
   return ctx;
 }
-
-export const COUPON_DISCOUNTS: Record<string, number> = { WELCOME10: 0.1, STITCH20: 0.2, GOLD5: 0.05 };

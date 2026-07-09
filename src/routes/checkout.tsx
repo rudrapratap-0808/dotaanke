@@ -1,9 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2, ShieldCheck } from "lucide-react";
-import { COUPON_DISCOUNTS, useStore, type Order } from "@/lib/store";
+import { useStore } from "@/lib/store";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
+import { buildWhatsappMessage } from "@/lib/api";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — दो Taanke" }, { name: "robots", content: "noindex" }] }),
@@ -15,37 +18,74 @@ type Form = {
 };
 
 function Checkout() {
-  const { cart, subtotal, coupon, clearCart, addOrder } = useStore();
-  const [paying, setPaying] = useState(false);
+  const { cart, subtotal, coupon, clearCart } = useStore();
+  const { user } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors } } = useForm<Form>();
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<Form>();
 
-  const discountRate = coupon ? COUPON_DISCOUNTS[coupon] ?? 0 : 0;
-  const discount = Math.round(subtotal * discountRate);
+  useEffect(() => {
+    if (user?.email) setValue("email", user.email);
+  }, [user, setValue]);
+
+  const discount = coupon ? Math.round((subtotal * coupon.percent) / 100) : 0;
   const total = subtotal - discount;
 
-  const onPay = async (data: Form) => {
+  const onSubmit = async (data: Form) => {
     if (cart.length === 0) return toast.error("Your bag is empty");
-    setPaying(true);
-    await new Promise((r) => setTimeout(r, 1400));
-    const order: Order = {
-      id: `DT-${Date.now().toString(36).toUpperCase()}`,
-      txnId: `TXN${Math.floor(Math.random() * 9e11 + 1e11)}`,
-      createdAt: new Date().toISOString(),
-      customer: data,
-      items: cart,
-      subtotal,
-      total,
-      discount,
-      couponCode: coupon ?? undefined,
-      paymentStatus: "PAID_DEMO",
-    };
-    addOrder(order);
-    // Admin notification stub — replace with EmailJS/Nodemailer when keys are added.
-    console.info("[admin email → dotaanke@outlook.com]", order);
-    clearCart();
-    setPaying(false);
-    navigate({ to: "/order-success", search: { id: order.id } as never });
+    setSubmitting(true);
+    try {
+      const items = cart.map((c) => ({
+        productId: c.productId,
+        name: c.name,
+        price: c.price,
+        size: c.size,
+        quantity: c.quantity,
+        image: c.image,
+      }));
+      const { data: inserted, error } = await supabase
+        .from("orders")
+        .insert({
+          user_id: user?.id ?? null,
+          customer_name: data.name,
+          phone: data.phone,
+          email: data.email,
+          address: data.address,
+          city: data.city,
+          state: data.state,
+          pincode: data.pincode,
+          items,
+          subtotal,
+          discount,
+          total,
+          coupon_code: coupon?.code ?? null,
+        })
+        .select("*")
+        .single();
+      if (error) throw error;
+
+      // Build WhatsApp message and cache on order
+      const message = buildWhatsappMessage({
+        orderNumber: inserted.order_number,
+        name: data.name,
+        phone: data.phone,
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        pincode: data.pincode,
+        items,
+        total,
+      });
+      await supabase.from("orders").update({ whatsapp_message: message }).eq("id", inserted.id);
+
+      clearCart();
+      navigate({ to: "/pay/$orderNumber", params: { orderNumber: inserted.order_number } });
+    } catch (e) {
+      console.error(e);
+      toast.error("Could not place order. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (cart.length === 0) {
@@ -62,7 +102,7 @@ function Checkout() {
       <p className="eyebrow">Checkout</p>
       <h1 className="mt-3 font-serif text-5xl">Almost yours.</h1>
 
-      <form onSubmit={handleSubmit(onPay)} className="mt-10 grid gap-12 lg:grid-cols-[1.4fr_1fr]">
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-10 grid gap-12 lg:grid-cols-[1.4fr_1fr]">
         <div className="space-y-8">
           <Section title="Contact">
             <Grid>
@@ -112,17 +152,17 @@ function Checkout() {
           </ul>
           <div className="mt-4 space-y-1 border-t border-border pt-4 text-sm">
             <Row l="Subtotal" v={`₹${subtotal}`} />
-            {discount > 0 && <Row l={`Discount (${coupon})`} v={`− ₹${discount}`} />}
+            {discount > 0 && <Row l={`Discount (${coupon?.code})`} v={`− ₹${discount}`} />}
             <Row l="Shipping" v="Free" />
             <div className="mt-3 flex justify-between border-t border-border pt-3 font-serif text-xl">
               <span>Total</span><span>₹{total}</span>
             </div>
           </div>
-          <button type="submit" disabled={paying} className="btn-primary mt-6 w-full">
-            {paying ? <><Loader2 className="h-4 w-4 animate-spin" /> Processing…</> : `Pay ₹${total}`}
+          <button type="submit" disabled={submitting} className="btn-primary mt-6 w-full">
+            {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Placing order…</> : `Continue to Payment · ₹${total}`}
           </button>
           <p className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-            <ShieldCheck className="h-3.5 w-3.5" /> Demo payment — no card required
+            <ShieldCheck className="h-3.5 w-3.5" /> Pay via UPI / Bank on the next step
           </p>
         </aside>
       </form>

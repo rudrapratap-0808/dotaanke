@@ -3,25 +3,30 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, ShieldCheck, Truck, RefreshCcw } from "lucide-react";
 import heroImg from "@/assets/hero.jpg";
 import craftImg from "@/assets/craft.jpg";
-import { products } from "@/lib/products";
+import { productsQuery } from "@/lib/api";
 import { ProductCard } from "@/components/ProductCard";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/")({
+  loader: ({ context }) => context.queryClient.ensureQueryData(productsQuery()),
   component: Home,
 });
 
 function Home() {
+  const { data: products } = useSuspenseQuery(productsQuery());
+  const featured = products.slice(0, 4);
+  const cat1 = products.find((p) => p.category === "Shirts") ?? products[0];
+  const cat2 = products.find((p) => p.category === "Kurtis") ?? products[1] ?? products[0];
   return (
     <>
       <Hero />
       <Marquee />
-      <Featured />
-      <Categories />
+      <Featured products={featured} />
+      <Categories a={cat1} b={cat2} />
       <Craft />
       <Reviews />
-      <Instagram />
       <Newsletter />
     </>
   );
@@ -100,7 +105,8 @@ function SectionHeader({ eyebrow, title, cta }: { eyebrow: string; title: string
   );
 }
 
-function Featured() {
+function Featured({ products }: { products: import("@/lib/products").Product[] }) {
+  if (products.length === 0) return null;
   return (
     <section className="py-24">
       <SectionHeader eyebrow="Best sellers" title="The heirlooms" cta={{ to: "/shop", label: "View all" }} />
@@ -111,10 +117,11 @@ function Featured() {
   );
 }
 
-function Categories() {
+function Categories({ a, b }: { a?: import("@/lib/products").Product; b?: import("@/lib/products").Product }) {
+  if (!a && !b) return null;
   const cats = [
-    { title: "Embroidery Shirts", to: "/shop", tag: "For Him", price: "From ₹799" },
-    { title: "Embroidery Kurtis", to: "/shop", tag: "For Her", price: "From ₹899" },
+    { title: "Embroidery Shirts", tag: "For Him", price: "From ₹799", img: a?.image ?? b?.image },
+    { title: "Embroidery Kurtis", tag: "For Her", price: "From ₹899", img: b?.image ?? a?.image },
   ];
   return (
     <section className="py-24">
@@ -129,19 +136,16 @@ function Categories() {
             transition={{ duration: 0.8, delay: i * 0.1 }}
             className="group relative overflow-hidden rounded-2xl bg-cream"
           >
-            <img
-              src={i === 0 ? products[0].image : products[1].image}
-              alt={c.title}
-              className="h-[520px] w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
-              loading="lazy"
-            />
+            {c.img && (
+              <img src={c.img} alt={c.title} className="h-[520px] w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105" loading="lazy" />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-foreground/10 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-8">
               <p className="eyebrow text-background/80">{c.tag}</p>
               <h3 className="mt-2 font-serif text-4xl text-background">{c.title}</h3>
               <div className="mt-4 flex items-center justify-between">
                 <p className="text-sm text-background/80">{c.price}</p>
-                <Link to={c.to} className="rounded-full bg-background px-5 py-2 text-xs font-medium tracking-widest text-foreground transition-transform hover:scale-105">
+                <Link to="/shop" className="rounded-full bg-background px-5 py-2 text-xs font-medium tracking-widest text-foreground transition-transform hover:scale-105">
                   Explore
                 </Link>
               </div>
@@ -167,30 +171,13 @@ function Craft() {
           className="rounded-2xl object-cover"
           loading="lazy"
         />
-        <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.9 }}
-        >
+        <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.9 }}>
           <p className="eyebrow">The atelier</p>
           <h2 className="mt-4 font-serif text-4xl md:text-5xl">Slow craft, in a hurried world.</h2>
           <p className="mt-6 leading-relaxed text-foreground/80">
             Each piece is drawn, threaded and finished by artisans in small workshops across Lucknow and Jaipur.
             A single kurti takes up to three days. Two stitches — दो taanke — and a story begins.
           </p>
-          <div className="mt-8 grid grid-cols-3 gap-6">
-            {[
-              { n: "48h", l: "Hand-embroidery per piece" },
-              { n: "12", l: "Master artisans" },
-              { n: "100%", l: "Cotton, ethically sourced" },
-            ].map((s) => (
-              <div key={s.n}>
-                <p className="font-serif text-3xl text-primary">{s.n}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{s.l}</p>
-              </div>
-            ))}
-          </div>
           <Link to="/about" className="btn-ghost mt-8">Read our story <ArrowRight className="h-4 w-4" /></Link>
         </motion.div>
       </div>
@@ -200,43 +187,20 @@ function Craft() {
 
 function Reviews() {
   const reviews = [
-    { name: "Ananya S.", city: "Mumbai", text: "The embroidery is unreal. Everyone at the wedding asked where it was from." , rating: 5 },
-    { name: "Rohan K.", city: "Bengaluru", text: "Fit is exquisite. The maroon thread work looks even better in person.", rating: 5 },
-    { name: "Meera P.", city: "Delhi", text: "This is what quiet luxury feels like. I've ordered three already.", rating: 5 },
+    { name: "Ananya S.", city: "Mumbai", text: "The embroidery is unreal. Everyone at the wedding asked where it was from." },
+    { name: "Rohan K.", city: "Bengaluru", text: "Fit is exquisite. The maroon thread work looks even better in person." },
+    { name: "Meera P.", city: "Delhi", text: "This is what quiet luxury feels like. I've ordered three already." },
   ];
   return (
     <section className="bg-cream py-24">
       <SectionHeader eyebrow="Customer stories" title="Loved, worn, treasured" />
       <div className="mx-auto mt-12 grid max-w-7xl gap-6 px-5 md:grid-cols-3 md:px-10">
         {reviews.map((r, i) => (
-          <motion.blockquote
-            key={r.name}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.1, duration: 0.7 }}
-            className="rounded-2xl bg-background p-8 shadow-soft"
-          >
-            <div className="mb-4 flex gap-0.5 text-gold">{Array.from({ length: r.rating }).map((_, j) => <span key={j}>★</span>)}</div>
+          <motion.blockquote key={r.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.7 }} className="rounded-2xl bg-background p-8 shadow-soft">
+            <div className="mb-4 flex gap-0.5 text-gold">★★★★★</div>
             <p className="font-serif text-lg leading-relaxed">"{r.text}"</p>
             <footer className="mt-6 text-sm text-muted-foreground">— {r.name}, {r.city}</footer>
           </motion.blockquote>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function Instagram() {
-  const tiles = [products[0].image, products[1].image, products[0].image, products[1].image, products[0].image, products[1].image];
-  return (
-    <section className="py-24">
-      <SectionHeader eyebrow="@dotaanke" title="Follow the thread" />
-      <div className="mx-auto mt-12 grid max-w-7xl grid-cols-3 gap-2 px-5 md:grid-cols-6 md:px-10">
-        {tiles.map((src, i) => (
-          <a key={i} href="#" className="group relative aspect-square overflow-hidden rounded-md bg-cream">
-            <img src={src} alt="Instagram tile" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
-          </a>
         ))}
       </div>
     </section>

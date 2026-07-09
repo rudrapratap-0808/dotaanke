@@ -16,7 +16,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
       transition={{ duration: 0.6, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
       className="group"
     >
-      <Link to="/product/$id" params={{ id: product.id }} className="block">
+      <Link to="/product/$id" params={{ id: product.slug }} className="block">
         <div className="relative overflow-hidden rounded-lg bg-cream aspect-[4/5]">
           <img
             src={product.image}
@@ -47,6 +47,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
               e.preventDefault();
               addToCart({
                 productId: product.id,
+                slug: product.slug,
                 name: product.name,
                 price: product.price,
                 image: product.image,

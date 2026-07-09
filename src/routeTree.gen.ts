@@ -10,19 +10,30 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WishlistRouteImport } from './routes/wishlist'
+import { Route as TrackRouteImport } from './routes/track'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as OrderSuccessRouteImport } from './routes/order-success'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TrackOrderNumberRouteImport } from './routes/track.$orderNumber'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as PayOrderNumberRouteImport } from './routes/pay.$orderNumber'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
   path: '/wishlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrackRoute = TrackRouteImport.update({
+  id: '/track',
+  path: '/track',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -55,6 +66,21 @@ const CheckoutRoute = CheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -65,98 +91,149 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackOrderNumberRoute = TrackOrderNumberRouteImport.update({
+  id: '/$orderNumber',
+  path: '/$orderNumber',
+  getParentRoute: () => TrackRoute,
+} as any)
 const ProductIdRoute = ProductIdRouteImport.update({
   id: '/product/$id',
   path: '/product/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PayOrderNumberRoute = PayOrderNumberRouteImport.update({
+  id: '/pay/$orderNumber',
+  path: '/pay/$orderNumber',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/order-success': typeof OrderSuccessRoute
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/track': typeof TrackRouteWithChildren
   '/wishlist': typeof WishlistRoute
+  '/pay/$orderNumber': typeof PayOrderNumberRoute
   '/product/$id': typeof ProductIdRoute
+  '/track/$orderNumber': typeof TrackOrderNumberRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/order-success': typeof OrderSuccessRoute
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/track': typeof TrackRouteWithChildren
   '/wishlist': typeof WishlistRoute
+  '/pay/$orderNumber': typeof PayOrderNumberRoute
   '/product/$id': typeof ProductIdRoute
+  '/track/$orderNumber': typeof TrackOrderNumberRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/order-success': typeof OrderSuccessRoute
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/track': typeof TrackRouteWithChildren
   '/wishlist': typeof WishlistRoute
+  '/pay/$orderNumber': typeof PayOrderNumberRoute
   '/product/$id': typeof ProductIdRoute
+  '/track/$orderNumber': typeof TrackOrderNumberRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
+    | '/account'
+    | '/admin'
+    | '/auth'
     | '/checkout'
     | '/contact'
     | '/faq'
     | '/order-success'
     | '/shop'
     | '/sitemap.xml'
+    | '/track'
     | '/wishlist'
+    | '/pay/$orderNumber'
     | '/product/$id'
+    | '/track/$orderNumber'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
+    | '/account'
+    | '/admin'
+    | '/auth'
     | '/checkout'
     | '/contact'
     | '/faq'
     | '/order-success'
     | '/shop'
     | '/sitemap.xml'
+    | '/track'
     | '/wishlist'
+    | '/pay/$orderNumber'
     | '/product/$id'
+    | '/track/$orderNumber'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/account'
+    | '/admin'
+    | '/auth'
     | '/checkout'
     | '/contact'
     | '/faq'
     | '/order-success'
     | '/shop'
     | '/sitemap.xml'
+    | '/track'
     | '/wishlist'
+    | '/pay/$orderNumber'
     | '/product/$id'
+    | '/track/$orderNumber'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AccountRoute: typeof AccountRoute
+  AdminRoute: typeof AdminRoute
+  AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
   OrderSuccessRoute: typeof OrderSuccessRoute
   ShopRoute: typeof ShopRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TrackRoute: typeof TrackRouteWithChildren
   WishlistRoute: typeof WishlistRoute
+  PayOrderNumberRoute: typeof PayOrderNumberRoute
   ProductIdRoute: typeof ProductIdRoute
 }
 
@@ -167,6 +244,13 @@ declare module '@tanstack/react-router' {
       path: '/wishlist'
       fullPath: '/wishlist'
       preLoaderRoute: typeof WishlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/track': {
+      id: '/track'
+      path: '/track'
+      fullPath: '/track'
+      preLoaderRoute: typeof TrackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -211,6 +295,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -225,6 +330,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/track/$orderNumber': {
+      id: '/track/$orderNumber'
+      path: '/$orderNumber'
+      fullPath: '/track/$orderNumber'
+      preLoaderRoute: typeof TrackOrderNumberRouteImport
+      parentRoute: typeof TrackRoute
+    }
     '/product/$id': {
       id: '/product/$id'
       path: '/product/$id'
@@ -232,19 +344,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pay/$orderNumber': {
+      id: '/pay/$orderNumber'
+      path: '/pay/$orderNumber'
+      fullPath: '/pay/$orderNumber'
+      preLoaderRoute: typeof PayOrderNumberRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
+
+interface TrackRouteChildren {
+  TrackOrderNumberRoute: typeof TrackOrderNumberRoute
+}
+
+const TrackRouteChildren: TrackRouteChildren = {
+  TrackOrderNumberRoute: TrackOrderNumberRoute,
+}
+
+const TrackRouteWithChildren = TrackRoute._addFileChildren(TrackRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AccountRoute: AccountRoute,
+  AdminRoute: AdminRoute,
+  AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
   OrderSuccessRoute: OrderSuccessRoute,
   ShopRoute: ShopRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TrackRoute: TrackRouteWithChildren,
   WishlistRoute: WishlistRoute,
+  PayOrderNumberRoute: PayOrderNumberRoute,
   ProductIdRoute: ProductIdRoute,
 }
 export const routeTree = rootRouteImport

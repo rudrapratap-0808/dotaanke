@@ -1,15 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { products } from "@/lib/products";
+import { productsQuery } from "@/lib/api";
 import { useStore } from "@/lib/store";
 import { ProductCard } from "@/components/ProductCard";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/wishlist")({
   head: () => ({ meta: [{ title: "Wishlist — दो Taanke" }, { name: "robots", content: "noindex" }] }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(productsQuery()),
   component: Wishlist,
 });
 
 function Wishlist() {
   const { wishlist } = useStore();
+  const { data: products } = useSuspenseQuery(productsQuery());
   const items = products.filter((p) => wishlist.includes(p.id));
   return (
     <section className="mx-auto max-w-7xl px-5 py-16 md:px-10">
