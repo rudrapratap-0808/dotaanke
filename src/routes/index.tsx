@@ -36,7 +36,7 @@ function Hero() {
   return (
     <section className="relative -mt-20 flex min-h-[100svh] items-end overflow-hidden bg-cream pb-16 pt-32 md:pb-24">
       <div className="absolute inset-0">
-        <img src={heroImg} alt="Ivory hand-embroidered kurti" className="h-full w-full object-cover object-center opacity-95" />
+        <video src={heroVideo.url} autoPlay muted loop playsInline className="h-full w-full object-cover object-center opacity-95" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-background/40" />
       </div>
       <div className="relative mx-auto grid w-full max-w-7xl gap-10 px-5 md:px-10 lg:grid-cols-12">
