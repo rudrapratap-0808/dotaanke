@@ -197,3 +197,29 @@ export function Navbar() {
     </>
   );
 }
+
+function AccountButton() {
+  const { user, isAdmin } = useAuth();
+  const [open, setOpen] = useState(false);
+  if (!user) {
+    return (
+      <Link to="/auth" aria-label="Sign in" className="rounded-full p-2 text-foreground/80 hover:bg-muted hover:text-foreground">
+        <User className="h-[18px] w-[18px]" />
+      </Link>
+    );
+  }
+  return (
+    <div className="relative">
+      <button onClick={() => setOpen((v) => !v)} aria-label="Account" className="rounded-full p-2 text-foreground/80 hover:bg-muted hover:text-foreground">
+        <User className="h-[18px] w-[18px]" />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-11 z-[100] w-48 rounded-md border border-border bg-background p-2 shadow-luxe">
+          <Link to="/account" onClick={() => setOpen(false)} className="block rounded px-3 py-2 text-sm hover:bg-muted">My orders</Link>
+          <Link to="/track" onClick={() => setOpen(false)} className="block rounded px-3 py-2 text-sm hover:bg-muted">Track order</Link>
+          {isAdmin && <Link to="/admin" onClick={() => setOpen(false)} className="block rounded px-3 py-2 text-sm text-primary hover:bg-muted">Admin panel</Link>}
+        </div>
+      )}
+    </div>
+  );
+}
