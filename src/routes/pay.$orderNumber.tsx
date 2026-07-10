@@ -85,6 +85,73 @@ function PayPage() {
     toast.success("Copied");
   };
 
+  const onRazorpay = async () => {
+    if (!order) return;
+    setPayingRzp(true);
+    try {
+      const ok = await loadRazorpay();
+      if (!ok || !window.Razorpay) {
+        toast.error("Could not load Razorpay. Check your connection.");
+        return;
+      }
+      const res = await fetch("/api/public/razorpay/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderNumber: order.order_number }),
+      });
+      if (!res.ok) {
+        toast.error("Could not start payment. Please try again.");
+        return;
+      }
+      const { orderId, amount, currency, keyId } = (await res.json()) as {
+        orderId: string; amount: number; currency: string; keyId: string;
+      };
+
+      const rzp = new window.Razorpay({
+        key: keyId,
+        amount,
+        currency,
+        order_id: orderId,
+        name: "दो Taanke",
+        description: `Order ${order.order_number}`,
+        prefill: {
+          name: order.customer_name,
+          email: order.email ?? undefined,
+          contact: order.phone,
+        },
+        theme: { color: "#8B2E2E" },
+        handler: async (response: unknown) => {
+          const r = response as { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
+          const verifyRes = await fetch("/api/public/razorpay/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...r, orderNumber: order.order_number }),
+          });
+          if (verifyRes.ok) {
+            toast.success("Payment verified!");
+            setDone(true);
+            navigate({ to: "/track/$orderNumber", params: { orderNumber: order.order_number } });
+          } else {
+            toast.error("Payment could not be verified. Contact support.");
+          }
+        },
+        modal: {
+          ondismiss: () => toast.message("Payment cancelled"),
+        },
+      });
+      rzp.on("payment.failed", (resp: unknown) => {
+        console.error("Razorpay payment failed", resp);
+        toast.error("Payment failed. Please try again.");
+      });
+      rzp.open();
+    } catch (e) {
+      console.error(e);
+      toast.error("Something went wrong. Try again.");
+    } finally {
+      setPayingRzp(false);
+    }
+  };
+
   return (
     <section className="mx-auto max-w-3xl px-5 py-16 md:px-10">
       <p className="eyebrow">Payment</p>
