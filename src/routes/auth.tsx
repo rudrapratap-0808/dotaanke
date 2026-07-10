@@ -13,13 +13,18 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+type Method = "password" | "otp";
+
 function AuthPage() {
   const search = useSearch({ from: "/auth" });
   const nextPath = search.redirect && search.redirect.startsWith("/") ? search.redirect : "/account";
+  const [method, setMethod] = useState<Method>("otp");
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -45,28 +50,63 @@ function AuthPage() {
     }
   };
 
-  const submit = async (e: React.FormEvent) => {
+  const sendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: true,
+          data: name ? { full_name: name } : undefined,
+          emailRedirectTo: `${window.location.origin}/auth`,
+        },
+      });
+      if (error) throw error;
+      setOtpSent(true);
+      toast.success("Verification code sent to your email.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not send code");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({ email, token: otp, type: "email" });
+      if (error) throw error;
+      toast.success("Signed in.");
+      navigate({ to: nextPath });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Invalid code");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const submitPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       if (mode === "signup") {
         const redirectUrl = `${window.location.origin}/account`;
         const { error } = await supabase.auth.signUp({
-          email,
-          password,
+          email, password,
           options: { emailRedirectTo: redirectUrl, data: { full_name: name } },
         });
         if (error) throw error;
-        toast.success("Account created. You're signed in.");
+        toast.success("Check your email to verify your account.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back.");
+        navigate({ to: nextPath });
       }
-      navigate({ to: nextPath });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Auth failed";
-      toast.error(msg);
+      toast.error(err instanceof Error ? err.message : "Auth failed");
     } finally {
       setLoading(false);
     }
@@ -77,7 +117,7 @@ function AuthPage() {
       <p className="eyebrow">Account</p>
       <h1 className="mt-3 font-serif text-4xl">{mode === "signin" ? "Welcome back" : "Create your account"}</h1>
       <p className="mt-3 text-sm text-muted-foreground">
-        {mode === "signin" ? "Sign in to track orders and save pieces you love." : "One account for orders, tracking and the wishlist."}
+        Sign in to track orders and save pieces you love.
       </p>
 
       <button
@@ -96,35 +136,96 @@ function AuthPage() {
         <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
       </div>
 
-      <form onSubmit={submit} className="mt-6 space-y-4">
+      <div className="mt-6 flex gap-2 rounded-full border border-border p-1 text-xs">
+        <button
+          type="button"
+          onClick={() => { setMethod("otp"); setOtpSent(false); }}
+          className={`flex-1 rounded-full py-2 transition-colors ${method === "otp" ? "bg-foreground text-background" : "text-muted-foreground"}`}
+        >
+          Email code
+        </button>
+        <button
+          type="button"
+          onClick={() => setMethod("password")}
+          className={`flex-1 rounded-full py-2 transition-colors ${method === "password" ? "bg-foreground text-background" : "text-muted-foreground"}`}
+        >
+          Password
+        </button>
+      </div>
 
-
-        {mode === "signup" && (
+      {method === "otp" && !otpSent && (
+        <form onSubmit={sendOtp} className="mt-6 space-y-4">
           <label className="block">
-            <span className="eyebrow">Name</span>
-            <input value={name} onChange={(e) => setName(e.target.value)} required className="input mt-2 w-full" />
+            <span className="eyebrow">Email</span>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="input mt-2 w-full" />
           </label>
-        )}
-        <label className="block">
-          <span className="eyebrow">Email</span>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="input mt-2 w-full" />
-        </label>
-        <label className="block">
-          <span className="eyebrow">Password</span>
-          <input type="password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required className="input mt-2 w-full" />
-        </label>
-        <button disabled={loading} className="btn-primary w-full">
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : mode === "signin" ? "Sign in" : "Create account"}
-        </button>
-      </form>
+          <label className="block">
+            <span className="eyebrow">Name (optional, for new accounts)</span>
+            <input value={name} onChange={(e) => setName(e.target.value)} className="input mt-2 w-full" />
+          </label>
+          <button disabled={loading} className="btn-primary w-full">
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send verification code"}
+          </button>
+          <p className="text-center text-xs text-muted-foreground">We'll email you a 6-digit code.</p>
+        </form>
+      )}
 
-      <p className="mt-6 text-center text-sm text-muted-foreground">
-        {mode === "signin" ? "New here?" : "Have an account?"}{" "}
-        <button className="text-primary underline" onClick={() => setMode(mode === "signin" ? "signup" : "signin")}>
-          {mode === "signin" ? "Create one" : "Sign in"}
-        </button>
-      </p>
-      <p className="mt-3 text-center text-xs text-muted-foreground">
+      {method === "otp" && otpSent && (
+        <form onSubmit={verifyOtp} className="mt-6 space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Enter the 6-digit code we sent to <strong className="text-foreground">{email}</strong>.
+          </p>
+          <label className="block">
+            <span className="eyebrow">Verification code</span>
+            <input
+              value={otp}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              inputMode="numeric"
+              pattern="[0-9]{6}"
+              maxLength={6}
+              required
+              className="input mt-2 w-full text-center text-2xl tracking-[0.5em]"
+              placeholder="••••••"
+            />
+          </label>
+          <button disabled={loading || otp.length !== 6} className="btn-primary w-full">
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify & sign in"}
+          </button>
+          <button type="button" onClick={() => { setOtpSent(false); setOtp(""); }} className="w-full text-center text-xs text-muted-foreground underline">
+            Use a different email
+          </button>
+        </form>
+      )}
+
+      {method === "password" && (
+        <form onSubmit={submitPassword} className="mt-6 space-y-4">
+          {mode === "signup" && (
+            <label className="block">
+              <span className="eyebrow">Name</span>
+              <input value={name} onChange={(e) => setName(e.target.value)} required className="input mt-2 w-full" />
+            </label>
+          )}
+          <label className="block">
+            <span className="eyebrow">Email</span>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="input mt-2 w-full" />
+          </label>
+          <label className="block">
+            <span className="eyebrow">Password</span>
+            <input type="password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required className="input mt-2 w-full" />
+          </label>
+          <button disabled={loading} className="btn-primary w-full">
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : mode === "signin" ? "Sign in" : "Create account"}
+          </button>
+          <p className="text-center text-sm text-muted-foreground">
+            {mode === "signin" ? "New here?" : "Have an account?"}{" "}
+            <button type="button" className="text-primary underline" onClick={() => setMode(mode === "signin" ? "signup" : "signin")}>
+              {mode === "signin" ? "Create one" : "Sign in"}
+            </button>
+          </p>
+        </form>
+      )}
+
+      <p className="mt-8 text-center text-xs text-muted-foreground">
         <Link to="/" className="hover:text-foreground">← Back to store</Link>
       </p>
     </section>
