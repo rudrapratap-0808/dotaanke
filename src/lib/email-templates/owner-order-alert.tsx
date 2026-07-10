@@ -69,7 +69,7 @@ export const template = {
   component: OwnerOrderAlertEmail,
   subject: (d: Record<string, any>) => `🛍️ New order ${d.orderNumber ?? ''} — ₹${d.total ?? 0}`,
   displayName: 'Owner: new order alert',
-  to: 'contact@dotaanke.store',
+  to: 'support@dotaanke.store',
   previewData: {
     orderNumber: 'DT-1001', customerName: 'Aanya', customerEmail: 'a@example.com',
     phone: '+91 98xxxx1234', address: '12 Rose Lane', city: 'Mumbai', state: 'MH', pincode: '400001',
