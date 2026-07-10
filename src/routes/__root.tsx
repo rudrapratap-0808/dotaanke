@@ -17,6 +17,7 @@ import { AuthProvider } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
+import { WhatsAppFab } from "@/components/WhatsAppFab";
 
 function NotFoundComponent() {
   return (
@@ -115,6 +116,7 @@ function RootComponent() {
           </main>
           <Footer />
           <CartDrawer />
+          <WhatsAppFab />
           <Toaster position="top-center" richColors closeButton />
         </StoreProvider>
       </AuthProvider>
