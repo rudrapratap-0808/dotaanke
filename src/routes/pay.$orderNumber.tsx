@@ -32,7 +32,9 @@ function PayPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [payingRzp, setPayingRzp] = useState(false);
   const [done, setDone] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchOrderByNumber(orderNumber).then(setOrder);
