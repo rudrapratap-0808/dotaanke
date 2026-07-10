@@ -96,6 +96,9 @@ function AuthPage() {
         <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
       </div>
 
+      <form onSubmit={submit} className="mt-6 space-y-4">
+
+
         {mode === "signup" && (
           <label className="block">
             <span className="eyebrow">Name</span>
