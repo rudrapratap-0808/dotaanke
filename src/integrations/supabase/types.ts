@@ -174,6 +174,8 @@ export type Database = {
           payment_status: Database["public"]["Enums"]["payment_status"]
           phone: string
           pincode: string
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
           state: string
           subtotal: number
           total: number
@@ -199,6 +201,8 @@ export type Database = {
           payment_status?: Database["public"]["Enums"]["payment_status"]
           phone: string
           pincode: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
           state: string
           subtotal: number
           total: number
@@ -224,6 +228,8 @@ export type Database = {
           payment_status?: Database["public"]["Enums"]["payment_status"]
           phone?: string
           pincode?: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
           state?: string
           subtotal?: number
           total?: number

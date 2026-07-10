@@ -1,21 +1,40 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Copy, Upload, MessageCircle, Loader2 } from "lucide-react";
+import { Copy, Upload, MessageCircle, Loader2, CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchOrderByNumber, fetchSettings, waLink, type Order, type Settings } from "@/lib/api";
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => { open: () => void; on: (e: string, cb: (r: unknown) => void) => void };
+  }
+}
 
 export const Route = createFileRoute("/pay/$orderNumber")({
   head: () => ({ meta: [{ title: "Complete payment — दो Taanke" }, { name: "robots", content: "noindex" }] }),
   component: PayPage,
 });
 
+function loadRazorpay(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (window.Razorpay) return resolve(true);
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
+  });
+}
+
 function PayPage() {
   const { orderNumber } = Route.useParams();
   const [order, setOrder] = useState<Order | null>(null);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [payingRzp, setPayingRzp] = useState(false);
   const [done, setDone] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchOrderByNumber(orderNumber).then(setOrder);
@@ -64,6 +83,73 @@ function PayPage() {
   const copy = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success("Copied");
+  };
+
+  const onRazorpay = async () => {
+    if (!order) return;
+    setPayingRzp(true);
+    try {
+      const ok = await loadRazorpay();
+      if (!ok || !window.Razorpay) {
+        toast.error("Could not load Razorpay. Check your connection.");
+        return;
+      }
+      const res = await fetch("/api/public/razorpay/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderNumber: order.order_number }),
+      });
+      if (!res.ok) {
+        toast.error("Could not start payment. Please try again.");
+        return;
+      }
+      const { orderId, amount, currency, keyId } = (await res.json()) as {
+        orderId: string; amount: number; currency: string; keyId: string;
+      };
+
+      const rzp = new window.Razorpay({
+        key: keyId,
+        amount,
+        currency,
+        order_id: orderId,
+        name: "दो Taanke",
+        description: `Order ${order.order_number}`,
+        prefill: {
+          name: order.customer_name,
+          email: order.email ?? undefined,
+          contact: order.phone,
+        },
+        theme: { color: "#8B2E2E" },
+        handler: async (response: unknown) => {
+          const r = response as { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
+          const verifyRes = await fetch("/api/public/razorpay/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...r, orderNumber: order.order_number }),
+          });
+          if (verifyRes.ok) {
+            toast.success("Payment verified!");
+            setDone(true);
+            navigate({ to: "/track/$orderNumber", params: { orderNumber: order.order_number } });
+          } else {
+            toast.error("Payment could not be verified. Contact support.");
+          }
+        },
+        modal: {
+          ondismiss: () => toast.message("Payment cancelled"),
+        },
+      });
+      rzp.on("payment.failed", (resp: unknown) => {
+        console.error("Razorpay payment failed", resp);
+        toast.error("Payment failed. Please try again.");
+      });
+      rzp.open();
+    } catch (e) {
+      console.error(e);
+      toast.error("Something went wrong. Try again.");
+    } finally {
+      setPayingRzp(false);
+    }
   };
 
   return (
@@ -117,9 +203,19 @@ function PayPage() {
           </div>
 
           <div className="mt-10 rounded-2xl border border-primary/30 bg-cream p-6">
-            <h2 className="font-serif text-2xl">After you pay</h2>
+            <h2 className="font-serif text-2xl">Pay online</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Tap below to send your payment screenshot on WhatsApp. Your message is pre-written with all order details.
+              Pay securely with UPI, card, netbanking or wallets via Razorpay. Instant confirmation, no screenshot needed.
+            </p>
+            <button onClick={onRazorpay} disabled={payingRzp} className="btn-primary mt-5 w-full">
+              {payingRzp ? <><Loader2 className="h-4 w-4 animate-spin" /> Opening…</> : <><CreditCard className="h-4 w-4" /> Pay ₹{order.total} with Razorpay</>}
+            </button>
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-border bg-cream p-6">
+            <h2 className="font-serif text-2xl">Or pay manually</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Paid via QR/bank above? Send your screenshot on WhatsApp or upload it here.
             </p>
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
               <button onClick={onWhatsApp} className="btn-primary flex-1">
