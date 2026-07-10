@@ -80,7 +80,22 @@ function AuthPage() {
         {mode === "signin" ? "Sign in to track orders and save pieces you love." : "One account for orders, tracking and the wishlist."}
       </p>
 
-      <form onSubmit={submit} className="mt-8 space-y-4">
+      <button
+        type="button"
+        onClick={signInWithGoogle}
+        disabled={loading}
+        className="mt-8 flex w-full items-center justify-center gap-3 rounded-md border border-border bg-background px-4 py-3 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-60"
+      >
+        <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.4-1.66 4.1-5.5 4.1-3.3 0-6-2.73-6-6.1s2.7-6.1 6-6.1c1.88 0 3.14.8 3.86 1.5l2.63-2.54C16.83 3.3 14.66 2.4 12 2.4 6.9 2.4 2.8 6.5 2.8 12s4.1 9.6 9.2 9.6c5.31 0 8.84-3.73 8.84-8.98 0-.6-.07-1.06-.16-1.52H12z"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div className="mt-6 flex items-center gap-3 text-xs text-muted-foreground">
+        <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
+      </div>
+
         {mode === "signup" && (
           <label className="block">
             <span className="eyebrow">Name</span>
