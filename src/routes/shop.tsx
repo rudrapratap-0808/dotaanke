@@ -56,7 +56,7 @@ function Shop() {
           </div>
 
           <Filter title="Category">
-            {["All", "Shirts", "Kurtis"].map((c) => (
+            {["All", "Shirts", "Kurtis", "Accessories"].map((c) => (
               <button key={c} onClick={() => setCategory(c)} className={`block text-left text-sm ${category === c ? "text-primary" : "text-foreground/70 hover:text-foreground"}`}>{c}</button>
             ))}
           </Filter>
