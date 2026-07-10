@@ -34,6 +34,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicRazorpayCreateOrderRouteImport } from './routes/api/public/razorpay/create-order'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
@@ -163,6 +164,12 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicRazorpayCreateOrderRoute =
+  ApiPublicRazorpayCreateOrderRouteImport.update({
+    id: '/api/public/razorpay/create-order',
+    path: '/api/public/razorpay/create-order',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/product/$id': typeof ProductIdRoute
   '/track/$orderNumber': typeof TrackOrderNumberRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/razorpay/create-order': typeof ApiPublicRazorpayCreateOrderRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -212,6 +220,7 @@ export interface FileRoutesByTo {
   '/product/$id': typeof ProductIdRoute
   '/track/$orderNumber': typeof TrackOrderNumberRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/razorpay/create-order': typeof ApiPublicRazorpayCreateOrderRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -240,6 +249,7 @@ export interface FileRoutesById {
   '/product/$id': typeof ProductIdRoute
   '/track/$orderNumber': typeof TrackOrderNumberRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/razorpay/create-order': typeof ApiPublicRazorpayCreateOrderRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -269,6 +279,7 @@ export interface FileRouteTypes {
     | '/product/$id'
     | '/track/$orderNumber'
     | '/lovable/email/suppression'
+    | '/api/public/razorpay/create-order'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -296,6 +307,7 @@ export interface FileRouteTypes {
     | '/product/$id'
     | '/track/$orderNumber'
     | '/lovable/email/suppression'
+    | '/api/public/razorpay/create-order'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -323,6 +335,7 @@ export interface FileRouteTypes {
     | '/product/$id'
     | '/track/$orderNumber'
     | '/lovable/email/suppression'
+    | '/api/public/razorpay/create-order'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -350,6 +363,7 @@ export interface RootRouteChildren {
   PayOrderNumberRoute: typeof PayOrderNumberRoute
   ProductIdRoute: typeof ProductIdRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicRazorpayCreateOrderRoute: typeof ApiPublicRazorpayCreateOrderRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -534,6 +548,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/razorpay/create-order': {
+      id: '/api/public/razorpay/create-order'
+      path: '/api/public/razorpay/create-order'
+      fullPath: '/api/public/razorpay/create-order'
+      preLoaderRoute: typeof ApiPublicRazorpayCreateOrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -567,6 +588,7 @@ const rootRouteChildren: RootRouteChildren = {
   PayOrderNumberRoute: PayOrderNumberRoute,
   ProductIdRoute: ProductIdRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicRazorpayCreateOrderRoute: ApiPublicRazorpayCreateOrderRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
