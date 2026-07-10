@@ -63,7 +63,7 @@ function AuthPage() {
         if (error) throw error;
         toast.success("Welcome back.");
       }
-      navigate({ to: "/account" });
+      navigate({ to: nextPath });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Auth failed";
       toast.error(msg);
