@@ -98,12 +98,10 @@ function RootShell({ children }: { children: ReactNode }) {
         {/* Critical inline CSS to prevent FOUC (header/footer flash before Tailwind loads) */}
         <style dangerouslySetInnerHTML={{ __html: `
           html,body{margin:0;padding:0;background:#fff;color:#111;font-family:Inter,system-ui,sans-serif;}
-          body{visibility:hidden;}
-          body.hydrated{visibility:visible;}
           header{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(255,255,255,0.85);backdrop-filter:blur(8px);}
           main{padding-top:80px;min-height:60vh;}
+          footer{margin-top:auto;}
         `}} />
-        <script dangerouslySetInnerHTML={{ __html: `document.documentElement.addEventListener('DOMContentLoaded',function(){document.body.classList.add('hydrated');});requestAnimationFrame(function(){document.body&&document.body.classList.add('hydrated');});` }} />
       </head>
       <body>
         {children}
