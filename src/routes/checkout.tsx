@@ -7,6 +7,7 @@ import { useStore } from "@/lib/store";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { buildWhatsappMessage } from "@/lib/api";
+import { sendTransactionalEmail } from "@/lib/email/send";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — दो Taanke" }, { name: "robots", content: "noindex" }] }),

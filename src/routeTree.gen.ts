@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WishlistRouteImport } from './routes/wishlist'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TrackRouteImport } from './routes/track'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ShopRouteImport } from './routes/shop'
@@ -37,6 +38,11 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
   path: '/wishlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrackRoute = TrackRouteImport.update({
@@ -172,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRouteWithChildren
+  '/unsubscribe': typeof UnsubscribeRoute
   '/wishlist': typeof WishlistRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/pay/$orderNumber': typeof PayOrderNumberRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRouteWithChildren
+  '/unsubscribe': typeof UnsubscribeRoute
   '/wishlist': typeof WishlistRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/pay/$orderNumber': typeof PayOrderNumberRoute
@@ -225,6 +233,7 @@ export interface FileRoutesById {
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRouteWithChildren
+  '/unsubscribe': typeof UnsubscribeRoute
   '/wishlist': typeof WishlistRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/pay/$orderNumber': typeof PayOrderNumberRoute
@@ -253,6 +262,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/sitemap.xml'
     | '/track'
+    | '/unsubscribe'
     | '/wishlist'
     | '/email/unsubscribe'
     | '/pay/$orderNumber'
@@ -279,6 +289,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/sitemap.xml'
     | '/track'
+    | '/unsubscribe'
     | '/wishlist'
     | '/email/unsubscribe'
     | '/pay/$orderNumber'
@@ -305,6 +316,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/sitemap.xml'
     | '/track'
+    | '/unsubscribe'
     | '/wishlist'
     | '/email/unsubscribe'
     | '/pay/$orderNumber'
@@ -332,6 +344,7 @@ export interface RootRouteChildren {
   ShopRoute: typeof ShopRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TrackRoute: typeof TrackRouteWithChildren
+  UnsubscribeRoute: typeof UnsubscribeRoute
   WishlistRoute: typeof WishlistRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   PayOrderNumberRoute: typeof PayOrderNumberRoute
@@ -351,6 +364,13 @@ declare module '@tanstack/react-router' {
       path: '/wishlist'
       fullPath: '/wishlist'
       preLoaderRoute: typeof WishlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/track': {
@@ -541,6 +561,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShopRoute: ShopRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TrackRoute: TrackRouteWithChildren,
+  UnsubscribeRoute: UnsubscribeRoute,
   WishlistRoute: WishlistRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   PayOrderNumberRoute: PayOrderNumberRoute,
