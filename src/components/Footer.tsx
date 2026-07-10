@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Instagram, Facebook, Youtube, Mail, Phone } from "lucide-react";
+import { Instagram, MessageCircle, Mail, Phone } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -17,9 +17,8 @@ export function Footer() {
             Every stitch tells a story. Hand-embroidered heirloom pieces for the modern Indian wardrobe.
           </p>
           <div className="mt-6 flex gap-3">
-            <a href="#" aria-label="Instagram" className="rounded-full border border-border p-2 transition-colors hover:border-primary hover:text-primary"><Instagram className="h-4 w-4" /></a>
-            <a href="#" aria-label="Facebook" className="rounded-full border border-border p-2 transition-colors hover:border-primary hover:text-primary"><Facebook className="h-4 w-4" /></a>
-            <a href="#" aria-label="YouTube" className="rounded-full border border-border p-2 transition-colors hover:border-primary hover:text-primary"><Youtube className="h-4 w-4" /></a>
+            <a href="https://www.instagram.com/do_taanke/" target="_blank" rel="noreferrer" aria-label="Instagram" className="rounded-full border border-border p-2 transition-colors hover:border-primary hover:text-primary"><Instagram className="h-4 w-4" /></a>
+            <a href="https://wa.me/917618516284" target="_blank" rel="noreferrer" aria-label="WhatsApp" className="rounded-full border border-border p-2 transition-colors hover:border-primary hover:text-primary"><MessageCircle className="h-4 w-4" /></a>
           </div>
         </div>
 
@@ -29,6 +28,7 @@ export function Footer() {
             <li><Link to="/shop" className="gold-underline">All Products</Link></li>
             <li><Link to="/shop" search={{ category: "Shirts" } as never} className="gold-underline">Embroidery Shirts</Link></li>
             <li><Link to="/shop" search={{ category: "Kurtis" } as never} className="gold-underline">Embroidery Kurtis</Link></li>
+            <li><Link to="/accessories" className="gold-underline">Accessories</Link></li>
             <li><Link to="/wishlist" className="gold-underline">Wishlist</Link></li>
           </ul>
         </div>
@@ -40,7 +40,7 @@ export function Footer() {
             <li><Link to="/contact" className="gold-underline">Contact</Link></li>
             <li><Link to="/about" className="gold-underline">Our Story</Link></li>
             <li className="flex items-center gap-2 text-muted-foreground"><Phone className="h-3.5 w-3.5" /> +91 76185 16284</li>
-            <li className="flex items-center gap-2 text-muted-foreground"><Mail className="h-3.5 w-3.5" /> dotaanke@outlook.com</li>
+            <li className="flex items-center gap-2 text-muted-foreground"><Mail className="h-3.5 w-3.5" /> contact@dotaanke.store</li>
           </ul>
         </div>
 

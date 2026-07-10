@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
@@ -87,6 +87,19 @@ function Checkout() {
       setSubmitting(false);
     }
   };
+
+  if (!user) {
+    return (
+      <section className="mx-auto max-w-md px-5 py-24 text-center md:px-10">
+        <p className="eyebrow">Almost there</p>
+        <h1 className="mt-3 font-serif text-4xl">Sign in to place your order</h1>
+        <p className="mt-4 text-sm text-muted-foreground">
+          Create an account or sign in so we can save your order, track it and email you updates.
+        </p>
+        <Link to="/auth" search={{ redirect: "/checkout" }} className="btn-primary mt-8">Sign in to continue</Link>
+      </section>
+    );
+  }
 
   if (cart.length === 0) {
     return (

@@ -48,7 +48,7 @@ function Contact() {
 
         <aside className="space-y-6">
           <Info icon={Phone} label="Call">+91 76185 16284 · +91 87420 80780</Info>
-          <Info icon={Mail} label="Email">dotaanke@outlook.com</Info>
+          <Info icon={Mail} label="Email">contact@dotaanke.store</Info>
           <Info icon={MapPin} label="Atelier">Lucknow · Jaipur · India</Info>
           <a href="https://wa.me/917618516284" target="_blank" rel="noreferrer" className="btn-gold w-full">
             <MessageCircle className="h-4 w-4" /> WhatsApp us
