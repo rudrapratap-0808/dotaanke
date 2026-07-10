@@ -1,14 +1,31 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Copy, Upload, MessageCircle, Loader2 } from "lucide-react";
+import { Copy, Upload, MessageCircle, Loader2, CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchOrderByNumber, fetchSettings, waLink, type Order, type Settings } from "@/lib/api";
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => { open: () => void; on: (e: string, cb: (r: unknown) => void) => void };
+  }
+}
 
 export const Route = createFileRoute("/pay/$orderNumber")({
   head: () => ({ meta: [{ title: "Complete payment — दो Taanke" }, { name: "robots", content: "noindex" }] }),
   component: PayPage,
 });
+
+function loadRazorpay(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (window.Razorpay) return resolve(true);
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
+  });
+}
 
 function PayPage() {
   const { orderNumber } = Route.useParams();
