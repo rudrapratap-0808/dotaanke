@@ -64,6 +64,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Hand-embroidered luxury Indian shirts and kurtis. दो Taanke crafts heirloom pieces where every stitch tells a story." },
       { name: "author", content: "दो Taanke" },
       { name: "theme-color", content: "#6A1E2E" },
+      { name: "google-site-verification", content: "wkbv2fhVDSPs1GBrFR_Vkm5x3a3Mz8ICaupnhsOObOU" },
       { property: "og:title", content: "दो Taanke — Every Stitch Tells A Story" },
       { property: "og:description", content: "Hand-embroidered luxury Indian shirts and kurtis. दो Taanke crafts heirloom pieces where every stitch tells a story." },
       { property: "og:type", content: "website" },
