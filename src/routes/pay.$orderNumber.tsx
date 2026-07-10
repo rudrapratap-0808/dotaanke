@@ -203,9 +203,19 @@ function PayPage() {
           </div>
 
           <div className="mt-10 rounded-2xl border border-primary/30 bg-cream p-6">
-            <h2 className="font-serif text-2xl">After you pay</h2>
+            <h2 className="font-serif text-2xl">Pay online</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Tap below to send your payment screenshot on WhatsApp. Your message is pre-written with all order details.
+              Pay securely with UPI, card, netbanking or wallets via Razorpay. Instant confirmation, no screenshot needed.
+            </p>
+            <button onClick={onRazorpay} disabled={payingRzp} className="btn-primary mt-5 w-full">
+              {payingRzp ? <><Loader2 className="h-4 w-4 animate-spin" /> Opening…</> : <><CreditCard className="h-4 w-4" /> Pay ₹{order.total} with Razorpay</>}
+            </button>
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-border bg-cream p-6">
+            <h2 className="font-serif text-2xl">Or pay manually</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Paid via QR/bank above? Send your screenshot on WhatsApp or upload it here.
             </p>
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
               <button onClick={onWhatsApp} className="btn-primary flex-1">
