@@ -1,9 +1,11 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link, useSearch } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth";
 import { Loader2 } from "lucide-react";
+import { z } from "zod";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign In — दो Taanke" }, { name: "robots", content: "noindex" }] }),
