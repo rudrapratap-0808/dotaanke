@@ -8,11 +8,14 @@ import { Loader2 } from "lucide-react";
 import { z } from "zod";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: z.object({ redirect: z.string().optional() }),
   head: () => ({ meta: [{ title: "Sign In — दो Taanke" }, { name: "robots", content: "noindex" }] }),
   component: AuthPage,
 });
 
 function AuthPage() {
+  const search = useSearch({ from: "/auth" });
+  const nextPath = search.redirect && search.redirect.startsWith("/") ? search.redirect : "/account";
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
