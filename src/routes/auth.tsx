@@ -25,8 +25,25 @@ function AuthPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) navigate({ to: "/account" });
-  }, [user, navigate]);
+    if (user) navigate({ to: nextPath });
+  }, [user, navigate, nextPath]);
+
+  const signInWithGoogle = async () => {
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: `${window.location.origin}/auth`,
+      });
+      if (result.error) throw result.error;
+      if (result.redirected) return;
+      toast.success("Signed in with Google.");
+      navigate({ to: nextPath });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Google sign in failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
