@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { sendTransactionalEmail } from "@/lib/email/send";
 import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 import { Loader2, Plus, Trash2, Save } from "lucide-react";
 
