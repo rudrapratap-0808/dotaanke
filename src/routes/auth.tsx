@@ -166,29 +166,29 @@ function AuthPage() {
           <button disabled={loading} className="btn-primary w-full">
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send verification code"}
           </button>
-          <p className="text-center text-xs text-muted-foreground">We'll email you a 6-digit code.</p>
+          <p className="text-center text-xs text-muted-foreground">We'll email you an 8-digit code.</p>
         </form>
       )}
 
       {method === "otp" && otpSent && (
         <form onSubmit={verifyOtp} className="mt-6 space-y-4">
           <p className="text-sm text-muted-foreground">
-            Enter the 6-digit code we sent to <strong className="text-foreground">{email}</strong>.
+            Enter the 8-digit code we sent to <strong className="text-foreground">{email}</strong>.
           </p>
           <label className="block">
             <span className="eyebrow">Verification code</span>
             <input
               value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 8))}
               inputMode="numeric"
-              pattern="[0-9]{6}"
-              maxLength={6}
+              pattern="[0-9]{6,8}"
+              maxLength={8}
               required
-              className="input mt-2 w-full text-center text-2xl tracking-[0.5em]"
-              placeholder="••••••"
+              className="input mt-2 w-full text-center text-2xl tracking-[0.4em]"
+              placeholder="••••••••"
             />
           </label>
-          <button disabled={loading || otp.length !== 6} className="btn-primary w-full">
+          <button disabled={loading || otp.length < 6} className="btn-primary w-full">
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify & sign in"}
           </button>
           <button type="button" onClick={() => { setOtpSent(false); setOtp(""); }} className="w-full text-center text-xs text-muted-foreground underline">
