@@ -18,7 +18,7 @@ const groups = [
     title: "Shipping",
     items: [
       { q: "Do you offer free shipping?", a: "Yes — every order ships free within India." },
-      { q: "How long does delivery take?", a: "2-3 business days for metros, 4-6 for other cities." },
+      { q: "How long does delivery take?", a: "7-10 business days across India after your order is confirmed." },
     ],
   },
   {

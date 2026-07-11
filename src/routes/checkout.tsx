@@ -7,7 +7,7 @@ import { useStore } from "@/lib/store";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { buildWhatsappMessage } from "@/lib/api";
-import { sendTransactionalEmail } from "@/lib/email/send";
+
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — दो Taanke" }, { name: "robots", content: "noindex" }] }),
@@ -78,31 +78,6 @@ function Checkout() {
         total,
       });
       await supabase.from("orders").update({ whatsapp_message: message }).eq("id", inserted.id);
-
-      // Fire-and-forget: order confirmation to customer + alert to owner
-      const emailData = {
-        orderNumber: inserted.order_number,
-        customerName: data.name,
-        customerEmail: data.email,
-        phone: data.phone,
-        address: data.address, city: data.city, state: data.state, pincode: data.pincode,
-        items, subtotal, discount, total,
-        couponCode: coupon?.code ?? null,
-        trackUrl: `${window.location.origin}/track/${inserted.order_number}`,
-        whatsappUrl: "https://wa.me/917618516284",
-      };
-      void sendTransactionalEmail({
-        templateName: "order-confirmation",
-        recipientEmail: data.email,
-        idempotencyKey: `order-confirm-${inserted.order_number}`,
-        templateData: emailData,
-      });
-      void sendTransactionalEmail({
-        templateName: "owner-order-alert",
-        recipientEmail: "contact@dotaanke.store",
-        idempotencyKey: `owner-alert-${inserted.order_number}`,
-        templateData: emailData,
-      });
 
       clearCart();
       navigate({ to: "/pay/$orderNumber", params: { orderNumber: inserted.order_number } });
@@ -201,7 +176,7 @@ function Checkout() {
             {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Placing order…</> : `Continue to Payment · ₹${total}`}
           </button>
           <p className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-            <ShieldCheck className="h-3.5 w-3.5" /> Pay via UPI / Bank on the next step
+            <ShieldCheck className="h-3.5 w-3.5" /> Secure payment via Razorpay · delivery in 7-10 days
           </p>
         </aside>
       </form>
