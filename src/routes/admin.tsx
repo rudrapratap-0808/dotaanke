@@ -142,19 +142,87 @@ function ProductsTab() {
 
 function ProductForm({ p, onChange, onCancel, onSave }: { p: Partial<Product>; onChange: (p: Partial<Product>) => void; onCancel: () => void; onSave: () => void }) {
   const upd = (k: keyof Product, v: unknown) => onChange({ ...p, [k]: v });
+  const [uploadingMain, setUploadingMain] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
+
+  const uploadToBucket = async (file: File): Promise<string | null> => {
+    const ext = file.name.split(".").pop() ?? "jpg";
+    const path = `${(p.slug || "product")}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error } = await supabase.storage.from("product-images").upload(path, file, { upsert: false, contentType: file.type });
+    if (error) {
+      toast.error(error.message);
+      return null;
+    }
+    const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+    return data.publicUrl;
+  };
+
+  const onMainFile = async (file: File) => {
+    setUploadingMain(true);
+    const url = await uploadToBucket(file);
+    if (url) upd("image_url", url);
+    setUploadingMain(false);
+  };
+
+  const onGalleryFiles = async (files: FileList) => {
+    setUploadingGallery(true);
+    const urls: string[] = [];
+    for (const f of Array.from(files)) {
+      const url = await uploadToBucket(f);
+      if (url) urls.push(url);
+    }
+    if (urls.length) upd("gallery", [...(p.gallery ?? []), ...urls]);
+    setUploadingGallery(false);
+  };
+
+  const removeGalleryAt = (idx: number) => {
+    const next = [...(p.gallery ?? [])];
+    next.splice(idx, 1);
+    upd("gallery", next);
+  };
+
   return (
     <div className="rounded-xl border border-border bg-cream p-6">
       <h2 className="font-serif text-2xl">{p.id ? "Edit product" : "New product"}</h2>
       <div className="mt-5 grid gap-4 md:grid-cols-2">
         <Field label="Name"><input className="input" value={p.name ?? ""} onChange={(e) => upd("name", e.target.value)} /></Field>
         <Field label="Slug (URL)"><input className="input" value={p.slug ?? ""} onChange={(e) => upd("slug", e.target.value.toLowerCase().replace(/\s+/g, "-"))} /></Field>
-        <Field label="Category"><select className="input" value={p.category ?? "Shirts"} onChange={(e) => upd("category", e.target.value)}><option>Shirts</option><option>Kurtis</option></select></Field>
+        <Field label="Category"><select className="input" value={p.category ?? "Shirts"} onChange={(e) => upd("category", e.target.value)}><option>Shirts</option><option>Kurtis</option><option>Accessories</option></select></Field>
         <Field label="Gender"><select className="input" value={p.gender ?? "Unisex"} onChange={(e) => upd("gender", e.target.value)}><option>Men</option><option>Women</option><option>Unisex</option></select></Field>
         <Field label="Price"><input type="number" className="input" value={p.price ?? 0} onChange={(e) => upd("price", Number(e.target.value))} /></Field>
         <Field label="Original price (optional)"><input type="number" className="input" value={p.original_price ?? ""} onChange={(e) => upd("original_price", e.target.value ? Number(e.target.value) : null)} /></Field>
-        <Field label="Image URL" full><input className="input" placeholder="https://..." value={p.image_url ?? ""} onChange={(e) => upd("image_url", e.target.value)} /></Field>
+
+        <Field label="Main image" full>
+          <div className="flex items-center gap-3">
+            {p.image_url && <img src={p.image_url} alt="" className="h-20 w-16 rounded object-cover" />}
+            <label className="btn-ghost cursor-pointer text-xs">
+              {uploadingMain ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              {p.image_url ? "Replace image" : "Upload image"}
+              <input type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && onMainFile(e.target.files[0])} />
+            </label>
+            {p.image_url && <button type="button" onClick={() => upd("image_url", "")} className="text-destructive"><Trash2 className="h-4 w-4" /></button>}
+          </div>
+        </Field>
+
+        <Field label="Gallery images" full>
+          <div className="flex flex-wrap gap-3">
+            {(p.gallery ?? []).map((url, i) => (
+              <div key={i} className="relative">
+                <img src={url} alt="" className="h-20 w-16 rounded object-cover" />
+                <button type="button" onClick={() => removeGalleryAt(i)} className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground">
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+            <label className="btn-ghost cursor-pointer text-xs">
+              {uploadingGallery ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              Add gallery images
+              <input type="file" accept="image/*" multiple hidden onChange={(e) => e.target.files && onGalleryFiles(e.target.files)} />
+            </label>
+          </div>
+        </Field>
+
         <Field label="Video URL (optional)" full><input className="input" placeholder="https://..." value={p.video_url ?? ""} onChange={(e) => upd("video_url", e.target.value)} /></Field>
-        <Field label="Gallery URLs (one per line)" full><textarea className="input min-h-24" value={(p.gallery ?? []).join("\n")} onChange={(e) => upd("gallery", e.target.value.split("\n").map((s) => s.trim()).filter(Boolean))} /></Field>
         <Field label="Description" full><textarea className="input min-h-32" value={p.description ?? ""} onChange={(e) => upd("description", e.target.value)} /></Field>
         <Field label="Sizes (comma separated)"><input className="input" value={(p.sizes ?? []).join(",")} onChange={(e) => upd("sizes", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} /></Field>
         <Field label="Badges (comma separated)"><input className="input" value={(p.badges ?? []).join(",")} onChange={(e) => upd("badges", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} /></Field>

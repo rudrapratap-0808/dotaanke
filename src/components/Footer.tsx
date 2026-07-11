@@ -40,7 +40,7 @@ export function Footer() {
             <li><Link to="/contact" className="gold-underline">Contact</Link></li>
             <li><Link to="/about" className="gold-underline">Our Story</Link></li>
             <li className="flex items-center gap-2 text-muted-foreground"><Phone className="h-3.5 w-3.5" /> +91 76185 16284</li>
-            <li className="flex items-center gap-2 text-muted-foreground"><Mail className="h-3.5 w-3.5" /> contact@dotaanke.store</li>
+            <li className="flex items-center gap-2 text-muted-foreground"><Mail className="h-3.5 w-3.5" /> support@dotaanke.store</li>
           </ul>
         </div>
 

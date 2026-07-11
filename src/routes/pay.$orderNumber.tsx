@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Copy, Upload, MessageCircle, Loader2, CreditCard } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { fetchOrderByNumber, fetchSettings, waLink, type Order, type Settings } from "@/lib/api";
+import { Loader2, CreditCard, ShieldCheck } from "lucide-react";
+import { fetchOrderByNumber, type Order } from "@/lib/api";
+import { sendTransactionalEmail } from "@/lib/email/send";
 
 declare global {
   interface Window {
@@ -30,64 +30,19 @@ function loadRazorpay(): Promise<boolean> {
 function PayPage() {
   const { orderNumber } = Route.useParams();
   const [order, setOrder] = useState<Order | null>(null);
-  const [settings, setSettings] = useState<Settings | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [payingRzp, setPayingRzp] = useState(false);
+  const [paying, setPaying] = useState(false);
   const [done, setDone] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchOrderByNumber(orderNumber).then(setOrder);
-    fetchSettings().then(setSettings);
   }, [orderNumber]);
 
-  if (!order || !settings) return <section className="mx-auto max-w-3xl px-5 py-24 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin" /></section>;
-
-  const whatsappNumber = settings.whatsapp_number || "+351930656040";
-  const message = order.whatsapp_message || "";
-
-  const flipToAwaiting = async () => {
-    if (order.payment_status === "pending") {
-      await supabase.from("orders").update({ payment_status: "awaiting_verification" }).eq("id", order.id);
-      setOrder({ ...order, payment_status: "awaiting_verification" });
-    }
-  };
-
-  const onWhatsApp = async () => {
-    await flipToAwaiting();
-    window.open(waLink(whatsappNumber, message), "_blank");
-    setDone(true);
-  };
-
-  const onUpload = async (file: File) => {
-    setUploading(true);
-    try {
-      const path = `${order.order_number}/${Date.now()}-${file.name}`;
-      const { error } = await supabase.storage.from("payment-proofs").upload(path, file, { upsert: false });
-      if (error) throw error;
-      await supabase.from("orders").update({
-        payment_status: "awaiting_verification",
-        payment_screenshot_url: path,
-      }).eq("id", order.id);
-      setOrder({ ...order, payment_status: "awaiting_verification", payment_screenshot_url: path });
-      toast.success("Screenshot uploaded. We'll verify shortly.");
-      setDone(true);
-    } catch (e) {
-      console.error(e);
-      toast.error("Upload failed. Try WhatsApp instead.");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const copy = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success("Copied");
-  };
+  if (!order) return <section className="mx-auto max-w-3xl px-5 py-24 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin" /></section>;
 
   const onRazorpay = async () => {
     if (!order) return;
-    setPayingRzp(true);
+    setPaying(true);
     try {
       const ok = await loadRazorpay();
       if (!ok || !window.Razorpay) {
@@ -119,7 +74,7 @@ function PayPage() {
           email: order.email ?? undefined,
           contact: order.phone,
         },
-        theme: { color: "#8B2E2E" },
+        theme: { color: "#6A1E2E" },
         handler: async (response: unknown) => {
           const r = response as { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
           const verifyRes = await fetch("/api/public/razorpay/verify", {
@@ -130,6 +85,34 @@ function PayPage() {
           if (verifyRes.ok) {
             toast.success("Payment verified!");
             setDone(true);
+            // Send confirmation emails (customer + owner) — fire-and-forget
+            const items = order.items as Array<{ name: string; size: string; quantity: number; price: number }>;
+            const emailData = {
+              orderNumber: order.order_number,
+              customerName: order.customer_name,
+              customerEmail: order.email,
+              phone: order.phone,
+              address: order.address, city: order.city, state: order.state, pincode: order.pincode,
+              items,
+              subtotal: order.subtotal, discount: order.discount, total: order.total,
+              couponCode: order.coupon_code ?? null,
+              trackUrl: `${window.location.origin}/track/${order.order_number}`,
+              deliveryEstimate: "7-10 business days",
+            };
+            if (order.email) {
+              void sendTransactionalEmail({
+                templateName: "order-confirmation",
+                recipientEmail: order.email,
+                idempotencyKey: `order-confirm-${order.order_number}`,
+                templateData: emailData,
+              });
+            }
+            void sendTransactionalEmail({
+              templateName: "owner-order-alert",
+              recipientEmail: "support@dotaanke.store",
+              idempotencyKey: `owner-alert-${order.order_number}`,
+              templateData: emailData,
+            });
             navigate({ to: "/track/$orderNumber", params: { orderNumber: order.order_number } });
           } else {
             toast.error("Payment could not be verified. Contact support.");
@@ -148,87 +131,45 @@ function PayPage() {
       console.error(e);
       toast.error("Something went wrong. Try again.");
     } finally {
-      setPayingRzp(false);
+      setPaying(false);
     }
   };
 
   return (
-    <section className="mx-auto max-w-3xl px-5 py-16 md:px-10">
+    <section className="mx-auto max-w-2xl px-5 py-16 md:px-10">
       <p className="eyebrow">Payment</p>
       <h1 className="mt-3 font-serif text-4xl md:text-5xl">Pay ₹{order.total} to complete</h1>
-      <p className="mt-3 text-sm text-muted-foreground">Order <span className="font-medium text-foreground">{order.order_number}</span></p>
+      <p className="mt-3 text-sm text-muted-foreground">
+        Order <span className="font-medium text-foreground">{order.order_number}</span>
+      </p>
 
       {done ? (
         <div className="mt-10 rounded-2xl border border-primary/30 bg-cream p-8 text-center">
-          <h2 className="font-serif text-2xl">Thanks! We'll verify your payment.</h2>
-          <p className="mt-3 text-sm text-muted-foreground">Once confirmed, we'll update your tracker within a few hours.</p>
+          <h2 className="font-serif text-2xl">Payment received. Thank you!</h2>
+          <p className="mt-3 text-sm text-muted-foreground">
+            A confirmation email is on its way. We'll deliver your order in 7-10 business days.
+          </p>
           <p className="mt-1 text-xs text-muted-foreground">— दो Taanke</p>
-          <Link to="/track/$orderNumber" params={{ orderNumber: order.order_number }} className="btn-primary mt-6">Track your order</Link>
+          <Link to="/track/$orderNumber" params={{ orderNumber: order.order_number }} className="btn-primary mt-6">
+            Track your order
+          </Link>
         </div>
       ) : (
-        <>
-          <div className="mt-8 grid gap-6 md:grid-cols-2">
-            <div className="rounded-2xl border border-border bg-cream p-6">
-              <p className="eyebrow">Scan UPI QR</p>
-              {settings.upi_qr_url ? (
-                <img src={settings.upi_qr_url} alt="UPI QR" className="mt-3 aspect-square w-full rounded-xl bg-background object-contain p-4" />
-              ) : (
-                <div className="mt-3 flex aspect-square w-full items-center justify-center rounded-xl border border-dashed border-border text-center text-xs text-muted-foreground">
-                  Admin hasn't added a UPI QR yet.
-                </div>
-              )}
-              {settings.upi_id && (
-                <div className="mt-4">
-                  <p className="eyebrow">UPI ID</p>
-                  <div className="mt-2 flex items-center justify-between gap-2 rounded-md border border-border bg-background px-3 py-2">
-                    <code className="text-sm">{settings.upi_id}</code>
-                    <button onClick={() => copy(settings.upi_id ?? "")} className="text-primary"><Copy className="h-4 w-4" /></button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="rounded-2xl border border-border bg-cream p-6">
-              <p className="eyebrow">Bank transfer</p>
-              {settings.bank_details ? (
-                <pre className="mt-3 whitespace-pre-wrap rounded-md bg-background p-3 text-xs">{settings.bank_details}</pre>
-              ) : (
-                <p className="mt-3 text-xs text-muted-foreground">Admin hasn't added bank details yet — use UPI above.</p>
-              )}
-              <div className="mt-6">
-                <p className="eyebrow">Amount</p>
-                <p className="mt-2 font-serif text-3xl">₹{order.total}</p>
-              </div>
-            </div>
+        <div className="mt-10 rounded-2xl border border-primary/30 bg-cream p-8">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <ShieldCheck className="h-4 w-4" /> Secure checkout by Razorpay
           </div>
-
-          <div className="mt-10 rounded-2xl border border-primary/30 bg-cream p-6">
-            <h2 className="font-serif text-2xl">Pay online</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Pay securely with UPI, card, netbanking or wallets via Razorpay. Instant confirmation, no screenshot needed.
-            </p>
-            <button onClick={onRazorpay} disabled={payingRzp} className="btn-primary mt-5 w-full">
-              {payingRzp ? <><Loader2 className="h-4 w-4 animate-spin" /> Opening…</> : <><CreditCard className="h-4 w-4" /> Pay ₹{order.total} with Razorpay</>}
-            </button>
-          </div>
-
-          <div className="mt-6 rounded-2xl border border-border bg-cream p-6">
-            <h2 className="font-serif text-2xl">Or pay manually</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Paid via QR/bank above? Send your screenshot on WhatsApp or upload it here.
-            </p>
-            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-              <button onClick={onWhatsApp} className="btn-primary flex-1">
-                <MessageCircle className="h-4 w-4" /> Send screenshot on WhatsApp
-              </button>
-              <label className="btn-ghost flex-1 cursor-pointer">
-                <Upload className="h-4 w-4" />
-                {uploading ? "Uploading…" : "Or upload screenshot here"}
-                <input type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
-              </label>
-            </div>
-          </div>
-        </>
+          <h2 className="mt-3 font-serif text-2xl">Pay with UPI, cards, netbanking or wallets</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Instant confirmation. Delivery in 7-10 business days across India.
+          </p>
+          <button onClick={onRazorpay} disabled={paying} className="btn-primary mt-6 w-full">
+            {paying ? <><Loader2 className="h-4 w-4 animate-spin" /> Opening…</> : <><CreditCard className="h-4 w-4" /> Pay ₹{order.total} securely</>}
+          </button>
+          <p className="mt-4 text-center text-xs text-muted-foreground">
+            Need help? Email <a href="mailto:support@dotaanke.store" className="text-primary underline">support@dotaanke.store</a>
+          </p>
+        </div>
       )}
     </section>
   );
