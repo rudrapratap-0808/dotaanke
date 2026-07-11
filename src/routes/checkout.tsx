@@ -96,6 +96,18 @@ function Checkout() {
       });
       await supabase.from("orders").update({ whatsapp_message: message }).eq("id", inserted.id);
 
+      // Auto-save address on profile for next time
+      if (user?.id) {
+        await supabase.from("profiles").update({
+          full_name: data.name,
+          phone: data.phone,
+          address: data.address,
+          city: data.city,
+          state: data.state,
+          pincode: data.pincode,
+        }).eq("id", user.id);
+      }
+
       clearCart();
       navigate({ to: "/pay/$orderNumber", params: { orderNumber: inserted.order_number } });
     } catch (e) {
