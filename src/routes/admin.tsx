@@ -257,6 +257,25 @@ function OrdersTab() {
     if (historyStatus) {
       await supabase.from("order_status_history").insert({ order_id: id, status: historyStatus, note: note ?? "" });
     }
+    // Notify customer when tracking status changes
+    if (patch.tracking_status) {
+      const order = items.find((it) => it.id === id);
+      if (order?.email) {
+        void sendTransactionalEmail({
+          templateName: "order-status-update",
+          recipientEmail: order.email,
+          idempotencyKey: `status-${id}-${patch.tracking_status}`,
+          templateData: {
+            orderNumber: order.order_number,
+            customerName: order.customer_name,
+            status: patch.tracking_status,
+            trackingNumber: patch.tracking_number ?? order.tracking_number ?? null,
+            note: note ?? null,
+            trackUrl: `${window.location.origin}/track/${order.order_number}`,
+          },
+        });
+      }
+    }
     toast.success("Updated");
     load();
   };
