@@ -26,7 +26,24 @@ function Checkout() {
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<Form>();
 
   useEffect(() => {
-    if (user?.email) setValue("email", user.email);
+    if (!user) return;
+    if (user.email) setValue("email", user.email);
+    let alive = true;
+    supabase
+      .from("profiles")
+      .select("full_name, phone, address, city, state, pincode")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!alive || !data) return;
+        if (data.full_name) setValue("name", data.full_name);
+        if (data.phone) setValue("phone", data.phone);
+        if (data.address) setValue("address", data.address);
+        if (data.city) setValue("city", data.city);
+        if (data.state) setValue("state", data.state);
+        if (data.pincode) setValue("pincode", data.pincode);
+      });
+    return () => { alive = false; };
   }, [user, setValue]);
 
   const discount = coupon ? Math.round((subtotal * coupon.percent) / 100) : 0;
@@ -78,6 +95,18 @@ function Checkout() {
         total,
       });
       await supabase.from("orders").update({ whatsapp_message: message }).eq("id", inserted.id);
+
+      // Auto-save address on profile for next time
+      if (user?.id) {
+        await supabase.from("profiles").update({
+          full_name: data.name,
+          phone: data.phone,
+          address: data.address,
+          city: data.city,
+          state: data.state,
+          pincode: data.pincode,
+        }).eq("id", user.id);
+      }
 
       clearCart();
       navigate({ to: "/pay/$orderNumber", params: { orderNumber: inserted.order_number } });

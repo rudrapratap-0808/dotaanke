@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
 
 export const Route = createFileRoute("/auth")({
@@ -26,6 +26,7 @@ function AuthPage() {
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -211,7 +212,25 @@ function AuthPage() {
           </label>
           <label className="block">
             <span className="eyebrow">Password</span>
-            <input type="password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required className="input mt-2 w-full" />
+            <div className="relative mt-2">
+              <input
+                type={showPassword ? "text" : "password"}
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="input w-full pr-11"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </label>
           <button disabled={loading} className="btn-primary w-full">
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : mode === "signin" ? "Sign in" : "Create account"}
