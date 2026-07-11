@@ -26,6 +26,7 @@ function AuthPage() {
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
