@@ -26,7 +26,24 @@ function Checkout() {
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<Form>();
 
   useEffect(() => {
-    if (user?.email) setValue("email", user.email);
+    if (!user) return;
+    if (user.email) setValue("email", user.email);
+    let alive = true;
+    supabase
+      .from("profiles")
+      .select("full_name, phone, address, city, state, pincode")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!alive || !data) return;
+        if (data.full_name) setValue("name", data.full_name);
+        if (data.phone) setValue("phone", data.phone);
+        if (data.address) setValue("address", data.address);
+        if (data.city) setValue("city", data.city);
+        if (data.state) setValue("state", data.state);
+        if (data.pincode) setValue("pincode", data.pincode);
+      });
+    return () => { alive = false; };
   }, [user, setValue]);
 
   const discount = coupon ? Math.round((subtotal * coupon.percent) / 100) : 0;
