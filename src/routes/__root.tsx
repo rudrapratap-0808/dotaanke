@@ -71,8 +71,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "दो Taanke — Every Stitch Tells A Story" },
       { name: "twitter:description", content: "Hand-embroidered luxury Indian shirts and kurtis. दो Taanke crafts heirloom pieces where every stitch tells a story." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/33cd4ed2-404c-4363-abe0-6f1daf3d2a1a/id-preview-33ddbcde--8333eb17-08b2-42af-910c-2f76df98b297.lovable.app-1783513146954.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/33cd4ed2-404c-4363-abe0-6f1daf3d2a1a/id-preview-33ddbcde--8333eb17-08b2-42af-910c-2f76df98b297.lovable.app-1783513146954.png" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/a076b529-4e07-4e7e-af05-aa51531ba461" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/a076b529-4e07-4e7e-af05-aa51531ba461" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
