@@ -124,8 +124,8 @@ function ProductsTab({ mode }: { mode: "clothing" | "accessories" }) {
     <div>
       <div className="mb-4 flex justify-between">
         <p className="text-sm text-muted-foreground">{items.length} product{items.length === 1 ? "" : "s"}</p>
-        <button onClick={() => setEditing({ active: true, bestseller: false, new_arrival: false })} className="btn-primary text-xs">
-          <Plus className="h-4 w-4" /> New product
+        <button onClick={() => setEditing({ active: true, bestseller: false, new_arrival: false, category: isAccessories ? "Accessories" : "Shirts" })} className="btn-primary text-xs">
+          <Plus className="h-4 w-4" /> New {isAccessories ? "accessory" : "clothing item"}
         </button>
       </div>
       {loading ? <p>Loading…</p> : (
