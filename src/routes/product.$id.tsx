@@ -152,6 +152,10 @@ function ProductPage() {
           </div>
           <button onClick={buyNow} className="btn-gold mt-3 w-full">Buy Now — ₹{product.price * qty}</button>
 
+          <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+            <Truck className="h-4 w-4 text-gold" /> Ships in 7–10 days
+          </p>
+
           <div className="mt-6 flex flex-wrap gap-3">
             <button
               onClick={() => {
