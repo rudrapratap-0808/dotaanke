@@ -33,6 +33,7 @@ function ProductPage() {
   const { data: product } = useSuspenseQuery(productBySlugQuery(id));
   const { data: allProducts } = useSuspenseQuery(productsQuery());
   const [size, setSize] = useState("M");
+  const [color, setColor] = useState<string>("");
   const [qty, setQty] = useState(1);
   const [active, setActive] = useState(0);
   const [zoom, setZoom] = useState({ x: 50, y: 50, on: false });
@@ -116,6 +117,27 @@ function ProductPage() {
               ))}
             </div>
           </div>
+
+          {product.colors.length > 0 && (
+            <div className="mt-6">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="eyebrow">Colour {color && <span className="ml-2 normal-case tracking-normal text-foreground/70">— {color}</span>}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {product.colors.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setColor(c)}
+                    className={`rounded-md border px-4 py-2 text-sm ${color === c ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-foreground"}`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
 
           <div className="mt-6 flex items-center gap-3">
             <div className="flex items-center rounded-md border border-border">
