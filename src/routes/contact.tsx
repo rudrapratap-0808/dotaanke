@@ -47,20 +47,11 @@ function Contact() {
         </form>
 
         <aside className="space-y-6">
-          <Info icon={Phone} label="Call">+91 76185 16284 · +91 87420 80780</Info>
+          <Info icon={Phone} label="Call">+91 86197 80142</Info>
           <Info icon={Mail} label="Email">support@dotaanke.store</Info>
-          <Info icon={MapPin} label="Atelier">Lucknow · Jaipur · India</Info>
           <a href="https://wa.me/918619780142" target="_blank" rel="noreferrer" className="btn-gold w-full">
             <MessageCircle className="h-4 w-4" /> WhatsApp us
           </a>
-          <div className="aspect-video overflow-hidden rounded-2xl border border-border">
-            <iframe
-              title="Location"
-              src="https://www.google.com/maps?q=Lucknow&output=embed"
-              className="h-full w-full"
-              loading="lazy"
-            />
-          </div>
         </aside>
       </div>
     </section>
