@@ -18,7 +18,7 @@ export function Footer() {
           </p>
           <div className="mt-6 flex gap-3">
             <a href="https://www.instagram.com/do_taanke/" target="_blank" rel="noreferrer" aria-label="Instagram" className="rounded-full border border-border p-2 transition-colors hover:border-primary hover:text-primary"><Instagram className="h-4 w-4" /></a>
-            <a href="https://wa.me/917618516284" target="_blank" rel="noreferrer" aria-label="WhatsApp" className="rounded-full border border-border p-2 transition-colors hover:border-primary hover:text-primary"><MessageCircle className="h-4 w-4" /></a>
+            <a href="https://wa.me/918619780142" target="_blank" rel="noreferrer" aria-label="WhatsApp" className="rounded-full border border-border p-2 transition-colors hover:border-primary hover:text-primary"><MessageCircle className="h-4 w-4" /></a>
           </div>
         </div>
 
