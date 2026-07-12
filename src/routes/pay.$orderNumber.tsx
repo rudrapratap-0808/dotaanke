@@ -107,9 +107,11 @@ function PayPage() {
                 templateData: emailData,
               });
             }
+            const { data: settings } = await supabase.from("site_settings").select("admin_email").eq("id", 1).maybeSingle();
+            const ownerEmail = settings?.admin_email || "support@dotaanke.store";
             void sendTransactionalEmail({
               templateName: "owner-order-alert",
-              recipientEmail: "support@dotaanke.store",
+              recipientEmail: ownerEmail,
               idempotencyKey: `owner-alert-${order.order_number}`,
               templateData: emailData,
             });

@@ -32,7 +32,25 @@ function AuthPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) navigate({ to: nextPath });
+    if (!user) return;
+    // Fire welcome email once per user; idempotency key prevents duplicates
+    const key = `welcome-sent-${user.id}`;
+    if (typeof window !== "undefined" && !localStorage.getItem(key)) {
+      const emailAddr = user.email;
+      if (emailAddr) {
+        void sendTransactionalEmail({
+          templateName: "welcome",
+          recipientEmail: emailAddr,
+          idempotencyKey: `welcome-${user.id}`,
+          templateData: {
+            customerName: (user.user_metadata as { full_name?: string } | null)?.full_name ?? emailAddr.split("@")[0],
+            siteUrl: window.location.origin,
+          },
+        });
+        localStorage.setItem(key, "1");
+      }
+    }
+    navigate({ to: nextPath });
   }, [user, navigate, nextPath]);
 
   const signInWithGoogle = async () => {
