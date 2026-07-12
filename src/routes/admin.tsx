@@ -172,6 +172,13 @@ function ProductForm({ p, onChange, onCancel, onSave }: { p: Partial<Product>; o
     setUploadingMain(false);
   };
 
+  const onVideoFile = async (file: File) => {
+    setUploadingVideo(true);
+    const url = await uploadToBucket(file);
+    if (url) upd("video_url", url);
+    setUploadingVideo(false);
+  };
+
   const onGalleryFiles = async (files: FileList) => {
     setUploadingGallery(true);
     const urls: string[] = [];
