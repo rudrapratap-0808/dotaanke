@@ -237,7 +237,20 @@ function ProductForm({ p, onChange, onCancel, onSave }: { p: Partial<Product>; o
           </div>
         </Field>
 
-        <Field label="Video URL (optional)" full><input className="input" placeholder="https://..." value={p.video_url ?? ""} onChange={(e) => upd("video_url", e.target.value)} /></Field>
+        <Field label="Product video (optional)" full>
+          <div className="flex flex-wrap items-center gap-3">
+            {p.video_url && (
+              <video src={p.video_url} controls className="h-24 w-32 rounded object-cover" />
+            )}
+            <label className="btn-ghost cursor-pointer text-xs">
+              {uploadingVideo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              {p.video_url ? "Replace video" : "Upload video from gallery"}
+              <input type="file" accept="video/*" hidden onChange={(e) => e.target.files?.[0] && onVideoFile(e.target.files[0])} />
+            </label>
+            {p.video_url && <button type="button" onClick={() => upd("video_url", "")} className="text-destructive"><Trash2 className="h-4 w-4" /></button>}
+          </div>
+          <input className="input mt-2" placeholder="…or paste a video URL" value={p.video_url ?? ""} onChange={(e) => upd("video_url", e.target.value)} />
+        </Field>
         <Field label="Description" full><textarea className="input min-h-32" value={p.description ?? ""} onChange={(e) => upd("description", e.target.value)} /></Field>
         <Field label="Sizes (comma separated)"><input className="input" value={(p.sizes ?? []).join(",")} onChange={(e) => upd("sizes", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} /></Field>
         <Field label="Colours (comma separated)"><input className="input" placeholder="Ivory, Rose, Indigo" value={((p as unknown as { colors?: string[] }).colors ?? []).join(",")} onChange={(e) => upd("colors" as keyof Product, e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} /></Field>
