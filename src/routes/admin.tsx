@@ -83,6 +83,7 @@ function ProductsTab() {
       original_price: editing.original_price ? Number(editing.original_price) : null,
       description: editing.description ?? "",
       sizes: editing.sizes ?? ["S", "M", "L", "XL", "XXL"],
+      colors: (editing as unknown as { colors?: string[] }).colors ?? [],
       features: editing.features ?? [],
       badges: editing.badges ?? [],
       image_url: editing.image_url ?? "",
@@ -188,7 +189,7 @@ function ProductForm({ p, onChange, onCancel, onSave }: { p: Partial<Product>; o
       <div className="mt-5 grid gap-4 md:grid-cols-2">
         <Field label="Name"><input className="input" value={p.name ?? ""} onChange={(e) => upd("name", e.target.value)} /></Field>
         <Field label="Slug (URL)"><input className="input" value={p.slug ?? ""} onChange={(e) => upd("slug", e.target.value.toLowerCase().replace(/\s+/g, "-"))} /></Field>
-        <Field label="Category"><select className="input" value={p.category ?? "Shirts"} onChange={(e) => upd("category", e.target.value)}><option>Shirts</option><option>Kurtis</option><option>Accessories</option></select></Field>
+        <Field label="Category"><select className="input" value={p.category ?? "Shirts"} onChange={(e) => upd("category", e.target.value)}><option>Shirts</option><option>T-Shirts</option><option>Kurtis</option><option>Accessories</option></select></Field>
         <Field label="Gender"><select className="input" value={p.gender ?? "Unisex"} onChange={(e) => upd("gender", e.target.value)}><option>Men</option><option>Women</option><option>Unisex</option></select></Field>
         <Field label="Price"><input type="number" className="input" value={p.price ?? 0} onChange={(e) => upd("price", Number(e.target.value))} /></Field>
         <Field label="Original price (optional)"><input type="number" className="input" value={p.original_price ?? ""} onChange={(e) => upd("original_price", e.target.value ? Number(e.target.value) : null)} /></Field>
@@ -226,6 +227,7 @@ function ProductForm({ p, onChange, onCancel, onSave }: { p: Partial<Product>; o
         <Field label="Video URL (optional)" full><input className="input" placeholder="https://..." value={p.video_url ?? ""} onChange={(e) => upd("video_url", e.target.value)} /></Field>
         <Field label="Description" full><textarea className="input min-h-32" value={p.description ?? ""} onChange={(e) => upd("description", e.target.value)} /></Field>
         <Field label="Sizes (comma separated)"><input className="input" value={(p.sizes ?? []).join(",")} onChange={(e) => upd("sizes", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} /></Field>
+        <Field label="Colours (comma separated)"><input className="input" placeholder="Ivory, Rose, Indigo" value={((p as unknown as { colors?: string[] }).colors ?? []).join(",")} onChange={(e) => upd("colors" as keyof Product, e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} /></Field>
         <Field label="Badges (comma separated)"><input className="input" value={(p.badges ?? []).join(",")} onChange={(e) => upd("badges", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} /></Field>
         <Field label="Features (comma separated)" full><input className="input" value={(p.features ?? []).join(",")} onChange={(e) => upd("features", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} /></Field>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!p.bestseller} onChange={(e) => upd("bestseller", e.target.checked)} /> Bestseller</label>
