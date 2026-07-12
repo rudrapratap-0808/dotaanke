@@ -447,3 +447,83 @@ function Field({ label, children, full }: { label: string; children: React.React
     </label>
   );
 }
+
+// ============ REVIEWS ============
+type Review = {
+  id: string;
+  product_id: string;
+  user_id: string | null;
+  author_name: string;
+  rating: number;
+  comment: string;
+  approved: boolean;
+  created_at: string;
+};
+
+function ReviewsTab() {
+  const [items, setItems] = useState<Review[]>([]);
+  const [products, setProducts] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    setLoading(true);
+    const [{ data: r }, { data: p }] = await Promise.all([
+      (supabase as unknown as { from: (t: string) => { select: (c: string) => { order: (col: string, o: { ascending: boolean }) => Promise<{ data: Review[] | null }> } } })
+        .from("reviews").select("*").order("created_at", { ascending: false }),
+      supabase.from("products").select("id,name"),
+    ]);
+    setItems(r ?? []);
+    const map: Record<string, string> = {};
+    (p ?? []).forEach((prod) => { map[prod.id] = prod.name; });
+    setProducts(map);
+    setLoading(false);
+  };
+  useEffect(() => { load(); }, []);
+
+  const patch = async (id: string, changes: Partial<Review>) => {
+    const { error } = await (supabase as unknown as { from: (t: string) => { update: (v: Partial<Review>) => { eq: (c: string, v: string) => Promise<{ error: { message: string } | null }> } } })
+      .from("reviews").update(changes).eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Updated");
+    load();
+  };
+
+  const del = async (id: string) => {
+    if (!confirm("Delete this review?")) return;
+    const { error } = await (supabase as unknown as { from: (t: string) => { delete: () => { eq: (c: string, v: string) => Promise<{ error: { message: string } | null }> } } })
+      .from("reviews").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Deleted");
+    load();
+  };
+
+  if (loading) return <p>Loading…</p>;
+  if (items.length === 0) return <p className="text-muted-foreground">No reviews yet.</p>;
+
+  return (
+    <div className="space-y-3">
+      {items.map((r) => (
+        <div key={r.id} className="rounded-xl border border-border bg-cream p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="font-serif text-lg">{r.author_name} · <span className="text-gold">{"★".repeat(r.rating)}</span></p>
+              <p className="text-xs text-muted-foreground">
+                {products[r.product_id] ?? r.product_id} · {new Date(r.created_at).toLocaleString("en-IN")}
+              </p>
+            </div>
+            <span className={`rounded-full px-2 py-0.5 text-xs ${r.approved ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+              {r.approved ? "Approved" : "Pending"}
+            </span>
+          </div>
+          {r.comment && <p className="mt-3 text-sm text-foreground/80">{r.comment}</p>}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button onClick={() => patch(r.id, { approved: !r.approved })} className="btn-ghost text-xs">
+              {r.approved ? "Unapprove" : "Approve"}
+            </button>
+            <button onClick={() => del(r.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
