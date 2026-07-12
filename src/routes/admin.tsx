@@ -17,12 +17,12 @@ export const Route = createFileRoute("/admin")({
   component: AdminPanel,
 });
 
-type Tab = "products" | "orders" | "coupons" | "reviews" | "settings";
+type Tab = "clothing" | "accessories" | "orders" | "coupons" | "reviews" | "settings";
 
 function AdminPanel() {
   const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>("products");
+  const [tab, setTab] = useState<Tab>("clothing");
 
   useEffect(() => {
     if (loading) return;
@@ -42,14 +42,15 @@ function AdminPanel() {
         <Link to="/" className="btn-ghost text-xs">← Back to store</Link>
       </div>
       <nav className="mt-8 flex flex-wrap gap-2 border-b border-border">
-        {(["products", "orders", "coupons", "reviews", "settings"] as Tab[]).map((t) => (
+        {(["clothing", "accessories", "orders", "coupons", "reviews", "settings"] as Tab[]).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 text-sm capitalize ${tab === t ? "border-b-2 border-primary text-primary" : "text-muted-foreground"}`}>
             {t}
           </button>
         ))}
       </nav>
       <div className="mt-8">
-        {tab === "products" && <ProductsTab />}
+        {tab === "clothing" && <ProductsTab mode="clothing" />}
+        {tab === "accessories" && <ProductsTab mode="accessories" />}
         {tab === "orders" && <OrdersTab />}
         {tab === "coupons" && <CouponsTab />}
         {tab === "reviews" && <ReviewsTab />}
