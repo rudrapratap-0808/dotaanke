@@ -24,20 +24,21 @@ const groups = [
   {
     title: "Returns & Refunds",
     items: [
-      { q: "What is your return policy?", a: "7-day easy returns on unworn pieces with original packaging." },
-      { q: "When will I receive my refund?", a: "Refunds are processed within 5-7 business days to the original payment method." },
+      { q: "Do you accept returns or refunds?", a: "As every piece is hand-embroidered to order, we do not offer returns or refunds. Please check the size chart carefully before placing your order — our team is happy to help you choose the right fit over WhatsApp." },
+      { q: "What if my order arrives damaged?", a: "In the rare case of a manufacturing defect or damage in transit, WhatsApp us within 24 hours of delivery with a video of the unboxing — we'll make it right." },
     ],
   },
   {
     title: "Sizing",
     items: [
-      { q: "How do I choose the right size?", a: "Refer to the size chart on each product page. When in doubt, size up — our fits run true." },
+      { q: "How do I choose the right size?", a: "Refer to the size chart on each product page. When in doubt, size up — our fits run true. You can also WhatsApp us for a personal fitting consultation." },
     ],
   },
   {
     title: "Payments",
     items: [
-      { q: "Which payment methods do you accept?", a: "This demo store uses a simulated payment. In production we support UPI, cards, netbanking, and wallets." },
+      { q: "Which payment methods do you accept?", a: "We accept UPI, credit & debit cards, wallets and netbanking — all through our secure payment gateway." },
+      { q: "Is my payment secure?", a: "Yes. Payments are processed via a PCI-DSS compliant gateway; we never see or store your card details." },
     ],
   },
 ];
