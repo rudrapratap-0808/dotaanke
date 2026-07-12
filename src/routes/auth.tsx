@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth";
+import { sendTransactionalEmail } from "@/lib/email/send";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
 
