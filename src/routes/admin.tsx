@@ -69,11 +69,13 @@ function ProductsTab({ mode }: { mode: "clothing" | "accessories" }) {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+    let q = supabase.from("products").select("*").order("created_at", { ascending: false });
+    q = isAccessories ? q.eq("category", "Accessories") : q.neq("category", "Accessories");
+    const { data } = await q;
     setItems(data ?? []);
     setLoading(false);
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [isAccessories]);
 
   const save = async () => {
     if (!editing) return;
