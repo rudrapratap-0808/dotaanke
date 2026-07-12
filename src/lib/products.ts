@@ -14,6 +14,7 @@ export type Product = {
   gallery: string[];
   video?: string;
   sizes: string[];
+  colors: string[];
   features: string[];
   description: string;
   badges: string[];
@@ -42,6 +43,7 @@ export function toProduct(r: ProductRow): Product {
     gallery,
     video: r.video_url || undefined,
     sizes: r.sizes ?? ["S", "M", "L", "XL", "XXL"],
+    colors: ((r as unknown as { colors?: string[] }).colors) ?? [],
     features: r.features ?? [],
     description: r.description ?? "",
     badges: r.badges ?? [],
