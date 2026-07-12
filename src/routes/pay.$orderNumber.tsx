@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Loader2, CreditCard, ShieldCheck } from "lucide-react";
 import { fetchOrderByNumber, type Order } from "@/lib/api";
 import { sendTransactionalEmail } from "@/lib/email/send";
+import { supabase } from "@/integrations/supabase/client";
 
 declare global {
   interface Window {
