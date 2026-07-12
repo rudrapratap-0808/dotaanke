@@ -19,9 +19,11 @@ type Form = {
 };
 
 function Checkout() {
-  const { cart, subtotal, coupon, clearCart } = useStore();
+  const { cart, subtotal, coupon, applyCoupon, clearCoupon, clearCart } = useStore();
   const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+  const [couponInput, setCouponInput] = useState("");
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
   const navigate = useNavigate();
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<Form>();
 
@@ -201,11 +203,44 @@ function Checkout() {
               <span>Total</span><span>₹{total}</span>
             </div>
           </div>
+
+          <div className="mt-4 border-t border-border pt-4">
+            {coupon ? (
+              <div className="flex items-center justify-between rounded-md bg-primary/10 px-3 py-2 text-xs">
+                <span className="font-mono">{coupon.code} · {coupon.percent}% off</span>
+                <button type="button" onClick={clearCoupon} className="text-primary underline">Remove</button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                  placeholder="Coupon code"
+                  className="input flex-1"
+                />
+                <button
+                  type="button"
+                  disabled={applyingCoupon || !couponInput}
+                  onClick={async () => {
+                    setApplyingCoupon(true);
+                    const res = await applyCoupon(couponInput);
+                    setApplyingCoupon(false);
+                    if (res.ok) { toast.success(res.message); setCouponInput(""); }
+                    else toast.error(res.message);
+                  }}
+                  className="btn-ghost text-xs"
+                >
+                  {applyingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
+                </button>
+              </div>
+            )}
+          </div>
+
           <button type="submit" disabled={submitting} className="btn-primary mt-6 w-full">
             {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Placing order…</> : `Continue to Payment · ₹${total}`}
           </button>
           <p className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-            <ShieldCheck className="h-3.5 w-3.5" /> Secure payment via Razorpay · delivery in 7-10 days
+            <ShieldCheck className="h-3.5 w-3.5" /> Secure payment via Razorpay
           </p>
         </aside>
       </form>

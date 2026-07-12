@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, ShieldCheck, Truck, RefreshCcw } from "lucide-react";
+import { ArrowRight, Sparkles, ShieldCheck, Truck } from "lucide-react";
 import heroVideo from "@/assets/hero.mp4.asset.json";
 import craftImg from "@/assets/craft.jpg";
 import { productsQuery } from "@/lib/api";
@@ -71,9 +71,8 @@ function Hero() {
 function Marquee() {
   const items = [
     { icon: Truck, label: "Free shipping across India" },
-    { icon: RefreshCcw, label: "7-day easy returns" },
     { icon: ShieldCheck, label: "Handcrafted, one at a time" },
-    { icon: Sparkles, label: "Real gold zari embroidery" },
+    { icon: Sparkles, label: "Heirloom embroidery, made to order" },
   ];
   return (
     <div className="border-y border-border bg-background">

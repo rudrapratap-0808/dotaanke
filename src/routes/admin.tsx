@@ -17,7 +17,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPanel,
 });
 
-type Tab = "products" | "orders" | "coupons" | "settings";
+type Tab = "products" | "orders" | "coupons" | "reviews" | "settings";
 
 function AdminPanel() {
   const { user, isAdmin, loading } = useAuth();
@@ -42,7 +42,7 @@ function AdminPanel() {
         <Link to="/" className="btn-ghost text-xs">← Back to store</Link>
       </div>
       <nav className="mt-8 flex flex-wrap gap-2 border-b border-border">
-        {(["products", "orders", "coupons", "settings"] as Tab[]).map((t) => (
+        {(["products", "orders", "coupons", "reviews", "settings"] as Tab[]).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 text-sm capitalize ${tab === t ? "border-b-2 border-primary text-primary" : "text-muted-foreground"}`}>
             {t}
           </button>
@@ -52,6 +52,7 @@ function AdminPanel() {
         {tab === "products" && <ProductsTab />}
         {tab === "orders" && <OrdersTab />}
         {tab === "coupons" && <CouponsTab />}
+        {tab === "reviews" && <ReviewsTab />}
         {tab === "settings" && <SettingsTab />}
       </div>
     </section>
@@ -83,6 +84,7 @@ function ProductsTab() {
       original_price: editing.original_price ? Number(editing.original_price) : null,
       description: editing.description ?? "",
       sizes: editing.sizes ?? ["S", "M", "L", "XL", "XXL"],
+      colors: (editing as unknown as { colors?: string[] }).colors ?? [],
       features: editing.features ?? [],
       badges: editing.badges ?? [],
       image_url: editing.image_url ?? "",
@@ -188,7 +190,7 @@ function ProductForm({ p, onChange, onCancel, onSave }: { p: Partial<Product>; o
       <div className="mt-5 grid gap-4 md:grid-cols-2">
         <Field label="Name"><input className="input" value={p.name ?? ""} onChange={(e) => upd("name", e.target.value)} /></Field>
         <Field label="Slug (URL)"><input className="input" value={p.slug ?? ""} onChange={(e) => upd("slug", e.target.value.toLowerCase().replace(/\s+/g, "-"))} /></Field>
-        <Field label="Category"><select className="input" value={p.category ?? "Shirts"} onChange={(e) => upd("category", e.target.value)}><option>Shirts</option><option>Kurtis</option><option>Accessories</option></select></Field>
+        <Field label="Category"><select className="input" value={p.category ?? "Shirts"} onChange={(e) => upd("category", e.target.value)}><option>Shirts</option><option>T-Shirts</option><option>Kurtis</option><option>Accessories</option></select></Field>
         <Field label="Gender"><select className="input" value={p.gender ?? "Unisex"} onChange={(e) => upd("gender", e.target.value)}><option>Men</option><option>Women</option><option>Unisex</option></select></Field>
         <Field label="Price"><input type="number" className="input" value={p.price ?? 0} onChange={(e) => upd("price", Number(e.target.value))} /></Field>
         <Field label="Original price (optional)"><input type="number" className="input" value={p.original_price ?? ""} onChange={(e) => upd("original_price", e.target.value ? Number(e.target.value) : null)} /></Field>
@@ -226,6 +228,7 @@ function ProductForm({ p, onChange, onCancel, onSave }: { p: Partial<Product>; o
         <Field label="Video URL (optional)" full><input className="input" placeholder="https://..." value={p.video_url ?? ""} onChange={(e) => upd("video_url", e.target.value)} /></Field>
         <Field label="Description" full><textarea className="input min-h-32" value={p.description ?? ""} onChange={(e) => upd("description", e.target.value)} /></Field>
         <Field label="Sizes (comma separated)"><input className="input" value={(p.sizes ?? []).join(",")} onChange={(e) => upd("sizes", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} /></Field>
+        <Field label="Colours (comma separated)"><input className="input" placeholder="Ivory, Rose, Indigo" value={((p as unknown as { colors?: string[] }).colors ?? []).join(",")} onChange={(e) => upd("colors" as keyof Product, e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} /></Field>
         <Field label="Badges (comma separated)"><input className="input" value={(p.badges ?? []).join(",")} onChange={(e) => upd("badges", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} /></Field>
         <Field label="Features (comma separated)" full><input className="input" value={(p.features ?? []).join(",")} onChange={(e) => upd("features", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} /></Field>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!p.bestseller} onChange={(e) => upd("bestseller", e.target.checked)} /> Bestseller</label>
@@ -442,5 +445,85 @@ function Field({ label, children, full }: { label: string; children: React.React
       <span className="eyebrow">{label}</span>
       <div className="mt-2">{children}</div>
     </label>
+  );
+}
+
+// ============ REVIEWS ============
+type Review = {
+  id: string;
+  product_id: string;
+  user_id: string | null;
+  author_name: string;
+  rating: number;
+  comment: string;
+  approved: boolean;
+  created_at: string;
+};
+
+function ReviewsTab() {
+  const [items, setItems] = useState<Review[]>([]);
+  const [products, setProducts] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    setLoading(true);
+    const [{ data: r }, { data: p }] = await Promise.all([
+      (supabase as unknown as { from: (t: string) => { select: (c: string) => { order: (col: string, o: { ascending: boolean }) => Promise<{ data: Review[] | null }> } } })
+        .from("reviews").select("*").order("created_at", { ascending: false }),
+      supabase.from("products").select("id,name"),
+    ]);
+    setItems(r ?? []);
+    const map: Record<string, string> = {};
+    (p ?? []).forEach((prod) => { map[prod.id] = prod.name; });
+    setProducts(map);
+    setLoading(false);
+  };
+  useEffect(() => { load(); }, []);
+
+  const patch = async (id: string, changes: Partial<Review>) => {
+    const { error } = await (supabase as unknown as { from: (t: string) => { update: (v: Partial<Review>) => { eq: (c: string, v: string) => Promise<{ error: { message: string } | null }> } } })
+      .from("reviews").update(changes).eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Updated");
+    load();
+  };
+
+  const del = async (id: string) => {
+    if (!confirm("Delete this review?")) return;
+    const { error } = await (supabase as unknown as { from: (t: string) => { delete: () => { eq: (c: string, v: string) => Promise<{ error: { message: string } | null }> } } })
+      .from("reviews").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Deleted");
+    load();
+  };
+
+  if (loading) return <p>Loading…</p>;
+  if (items.length === 0) return <p className="text-muted-foreground">No reviews yet.</p>;
+
+  return (
+    <div className="space-y-3">
+      {items.map((r) => (
+        <div key={r.id} className="rounded-xl border border-border bg-cream p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="font-serif text-lg">{r.author_name} · <span className="text-gold">{"★".repeat(r.rating)}</span></p>
+              <p className="text-xs text-muted-foreground">
+                {products[r.product_id] ?? r.product_id} · {new Date(r.created_at).toLocaleString("en-IN")}
+              </p>
+            </div>
+            <span className={`rounded-full px-2 py-0.5 text-xs ${r.approved ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+              {r.approved ? "Approved" : "Pending"}
+            </span>
+          </div>
+          {r.comment && <p className="mt-3 text-sm text-foreground/80">{r.comment}</p>}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button onClick={() => patch(r.id, { approved: !r.approved })} className="btn-ghost text-xs">
+              {r.approved ? "Unapprove" : "Approve"}
+            </button>
+            <button onClick={() => del(r.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

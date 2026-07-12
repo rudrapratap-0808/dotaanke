@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Loader2, CreditCard, ShieldCheck } from "lucide-react";
 import { fetchOrderByNumber, type Order } from "@/lib/api";
 import { sendTransactionalEmail } from "@/lib/email/send";
+import { supabase } from "@/integrations/supabase/client";
 
 declare global {
   interface Window {
@@ -107,9 +108,11 @@ function PayPage() {
                 templateData: emailData,
               });
             }
+            const { data: settings } = await supabase.from("site_settings").select("admin_email").eq("id", 1).maybeSingle();
+            const ownerEmail = settings?.admin_email || "support@dotaanke.store";
             void sendTransactionalEmail({
               templateName: "owner-order-alert",
-              recipientEmail: "support@dotaanke.store",
+              recipientEmail: ownerEmail,
               idempotencyKey: `owner-alert-${order.order_number}`,
               templateData: emailData,
             });
