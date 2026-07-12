@@ -152,12 +152,9 @@ function ProductPage() {
             </ul>
           )}
 
-          <div className="mt-6 flex gap-6 border-t border-border pt-6 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-2"><Truck className="h-4 w-4" /> Ships in 2-3 days</span>
-            <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> 7-day returns</span>
-          </div>
         </motion.div>
       </div>
+
 
       {related.length > 0 && (
         <section className="mt-24">
