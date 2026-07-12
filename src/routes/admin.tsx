@@ -151,6 +151,7 @@ function ProductForm({ p, onChange, onCancel, onSave }: { p: Partial<Product>; o
   const upd = (k: keyof Product, v: unknown) => onChange({ ...p, [k]: v });
   const [uploadingMain, setUploadingMain] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
 
   const uploadToBucket = async (file: File): Promise<string | null> => {
     const ext = file.name.split(".").pop() ?? "jpg";
