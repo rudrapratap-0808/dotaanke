@@ -61,7 +61,8 @@ function AdminPanel() {
 }
 
 // ============ PRODUCTS ============
-function ProductsTab() {
+function ProductsTab({ mode }: { mode: "clothing" | "accessories" }) {
+  const isAccessories = mode === "accessories";
   const [items, setItems] = useState<Product[]>([]);
   const [editing, setEditing] = useState<Partial<Product> | null>(null);
   const [loading, setLoading] = useState(true);
