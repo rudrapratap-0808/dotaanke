@@ -17,12 +17,12 @@ export const Route = createFileRoute("/admin")({
   component: AdminPanel,
 });
 
-type Tab = "products" | "orders" | "coupons" | "reviews" | "settings";
+type Tab = "clothing" | "accessories" | "orders" | "coupons" | "reviews" | "settings";
 
 function AdminPanel() {
   const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>("products");
+  const [tab, setTab] = useState<Tab>("clothing");
 
   useEffect(() => {
     if (loading) return;
@@ -42,14 +42,15 @@ function AdminPanel() {
         <Link to="/" className="btn-ghost text-xs">← Back to store</Link>
       </div>
       <nav className="mt-8 flex flex-wrap gap-2 border-b border-border">
-        {(["products", "orders", "coupons", "reviews", "settings"] as Tab[]).map((t) => (
+        {(["clothing", "accessories", "orders", "coupons", "reviews", "settings"] as Tab[]).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 text-sm capitalize ${tab === t ? "border-b-2 border-primary text-primary" : "text-muted-foreground"}`}>
             {t}
           </button>
         ))}
       </nav>
       <div className="mt-8">
-        {tab === "products" && <ProductsTab />}
+        {tab === "clothing" && <ProductsTab mode="clothing" />}
+        {tab === "accessories" && <ProductsTab mode="accessories" />}
         {tab === "orders" && <OrdersTab />}
         {tab === "coupons" && <CouponsTab />}
         {tab === "reviews" && <ReviewsTab />}
@@ -60,18 +61,21 @@ function AdminPanel() {
 }
 
 // ============ PRODUCTS ============
-function ProductsTab() {
+function ProductsTab({ mode }: { mode: "clothing" | "accessories" }) {
+  const isAccessories = mode === "accessories";
   const [items, setItems] = useState<Product[]>([]);
   const [editing, setEditing] = useState<Partial<Product> | null>(null);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+    let q = supabase.from("products").select("*").order("created_at", { ascending: false });
+    q = isAccessories ? q.eq("category", "Accessories") : q.neq("category", "Accessories");
+    const { data } = await q;
     setItems(data ?? []);
     setLoading(false);
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [isAccessories]);
 
   const save = async () => {
     if (!editing) return;
@@ -120,8 +124,8 @@ function ProductsTab() {
     <div>
       <div className="mb-4 flex justify-between">
         <p className="text-sm text-muted-foreground">{items.length} product{items.length === 1 ? "" : "s"}</p>
-        <button onClick={() => setEditing({ active: true, bestseller: false, new_arrival: false })} className="btn-primary text-xs">
-          <Plus className="h-4 w-4" /> New product
+        <button onClick={() => setEditing({ active: true, bestseller: false, new_arrival: false, category: isAccessories ? "Accessories" : "Shirts" })} className="btn-primary text-xs">
+          <Plus className="h-4 w-4" /> New {isAccessories ? "accessory" : "clothing item"}
         </button>
       </div>
       {loading ? <p>Loading…</p> : (
@@ -147,6 +151,7 @@ function ProductForm({ p, onChange, onCancel, onSave }: { p: Partial<Product>; o
   const upd = (k: keyof Product, v: unknown) => onChange({ ...p, [k]: v });
   const [uploadingMain, setUploadingMain] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
 
   const uploadToBucket = async (file: File): Promise<string | null> => {
     const ext = file.name.split(".").pop() ?? "jpg";
@@ -165,6 +170,13 @@ function ProductForm({ p, onChange, onCancel, onSave }: { p: Partial<Product>; o
     const url = await uploadToBucket(file);
     if (url) upd("image_url", url);
     setUploadingMain(false);
+  };
+
+  const onVideoFile = async (file: File) => {
+    setUploadingVideo(true);
+    const url = await uploadToBucket(file);
+    if (url) upd("video_url", url);
+    setUploadingVideo(false);
   };
 
   const onGalleryFiles = async (files: FileList) => {
@@ -225,7 +237,20 @@ function ProductForm({ p, onChange, onCancel, onSave }: { p: Partial<Product>; o
           </div>
         </Field>
 
-        <Field label="Video URL (optional)" full><input className="input" placeholder="https://..." value={p.video_url ?? ""} onChange={(e) => upd("video_url", e.target.value)} /></Field>
+        <Field label="Product video (optional)" full>
+          <div className="flex flex-wrap items-center gap-3">
+            {p.video_url && (
+              <video src={p.video_url} controls className="h-24 w-32 rounded object-cover" />
+            )}
+            <label className="btn-ghost cursor-pointer text-xs">
+              {uploadingVideo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              {p.video_url ? "Replace video" : "Upload video from gallery"}
+              <input type="file" accept="video/*" hidden onChange={(e) => e.target.files?.[0] && onVideoFile(e.target.files[0])} />
+            </label>
+            {p.video_url && <button type="button" onClick={() => upd("video_url", "")} className="text-destructive"><Trash2 className="h-4 w-4" /></button>}
+          </div>
+          <input className="input mt-2" placeholder="…or paste a video URL" value={p.video_url ?? ""} onChange={(e) => upd("video_url", e.target.value)} />
+        </Field>
         <Field label="Description" full><textarea className="input min-h-32" value={p.description ?? ""} onChange={(e) => upd("description", e.target.value)} /></Field>
         <Field label="Sizes (comma separated)"><input className="input" value={(p.sizes ?? []).join(",")} onChange={(e) => upd("sizes", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} /></Field>
         <Field label="Colours (comma separated)"><input className="input" placeholder="Ivory, Rose, Indigo" value={((p as unknown as { colors?: string[] }).colors ?? []).join(",")} onChange={(e) => upd("colors" as keyof Product, e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} /></Field>

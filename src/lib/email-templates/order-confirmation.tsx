@@ -41,7 +41,7 @@ export const OrderConfirmationEmail = ({
   total = 0,
   couponCode = null,
   trackUrl = 'https://dotaanke.store/track',
-  whatsappUrl = 'https://wa.me/917618516284',
+  whatsappUrl = 'https://wa.me/918619780142',
 }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />

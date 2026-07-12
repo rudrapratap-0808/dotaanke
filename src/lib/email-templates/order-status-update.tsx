@@ -53,7 +53,7 @@ export const OrderStatusUpdateEmail = ({
   trackingNumber = null,
   note = null,
   trackUrl = 'https://dotaanke.store/track',
-  whatsappUrl = 'https://wa.me/917618516284',
+  whatsappUrl = 'https://wa.me/918619780142',
 }: Props) => {
   const copy = STATUS_COPY[status] ?? {
     title: `Order update: ${humanStatus(status)}`,
