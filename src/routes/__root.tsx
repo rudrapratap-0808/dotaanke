@@ -120,6 +120,7 @@ function RootComponent() {
         <StoreProvider>
           <Navbar />
           <main className="pt-20">
+            <BackButton />
             <Outlet />
           </main>
           <Footer />
