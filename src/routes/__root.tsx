@@ -18,6 +18,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
 import { WhatsAppFab } from "@/components/WhatsAppFab";
+import { BackButton } from "@/components/BackButton";
 
 function NotFoundComponent() {
   return (
