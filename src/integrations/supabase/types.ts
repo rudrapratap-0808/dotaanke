@@ -247,6 +247,7 @@ export type Database = {
           badges: string[]
           bestseller: boolean
           category: string
+          colors: string[]
           created_at: string
           description: string | null
           features: string[]
@@ -270,6 +271,7 @@ export type Database = {
           badges?: string[]
           bestseller?: boolean
           category: string
+          colors?: string[]
           created_at?: string
           description?: string | null
           features?: string[]
@@ -293,6 +295,7 @@ export type Database = {
           badges?: string[]
           bestseller?: boolean
           category?: string
+          colors?: string[]
           created_at?: string
           description?: string | null
           features?: string[]
@@ -351,6 +354,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      reviews: {
+        Row: {
+          approved: boolean
+          author_name: string
+          comment: string
+          created_at: string
+          id: string
+          product_id: string
+          rating: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          approved?: boolean
+          author_name: string
+          comment?: string
+          created_at?: string
+          id?: string
+          product_id: string
+          rating: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          approved?: boolean
+          author_name?: string
+          comment?: string
+          created_at?: string
+          id?: string
+          product_id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_settings: {
         Row: {
