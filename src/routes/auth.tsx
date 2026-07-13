@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth";
 import { sendTransactionalEmail } from "@/lib/email/send";
+import { notifyOwnerNewSignup } from "@/lib/notify.functions";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
 
@@ -47,6 +48,12 @@ function AuthPage() {
             siteUrl: window.location.origin,
           },
         });
+        void notifyOwnerNewSignup({
+          data: {
+            email: emailAddr,
+            name: (user.user_metadata as { full_name?: string } | null)?.full_name,
+          },
+        }).catch(() => {});
         localStorage.setItem(key, "1");
       }
     }
