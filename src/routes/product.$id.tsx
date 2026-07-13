@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { productBySlugQuery, productsQuery } from "@/lib/api";
 import { useStore } from "@/lib/store";
 import { ProductCard } from "@/components/ProductCard";
+import { ReviewsSection } from "@/components/ReviewsSection";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/product/$id")({
@@ -181,6 +182,8 @@ function ProductPage() {
         </motion.div>
       </div>
 
+
+      <ReviewsSection productId={product.id} />
 
       {related.length > 0 && (
         <section className="mt-24">

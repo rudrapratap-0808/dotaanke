@@ -19,6 +19,7 @@ import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
 import { WhatsAppFab } from "@/components/WhatsAppFab";
 import { BackButton } from "@/components/BackButton";
+import { DiscountPopup } from "@/components/DiscountPopup";
 
 function NotFoundComponent() {
   return (
@@ -126,6 +127,7 @@ function RootComponent() {
           <Footer />
           <CartDrawer />
           <WhatsAppFab />
+          <DiscountPopup />
           <Toaster position="top-center" richColors closeButton />
         </StoreProvider>
       </AuthProvider>
