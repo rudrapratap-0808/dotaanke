@@ -17,6 +17,7 @@ export const Route = createFileRoute("/shop")({
 });
 
 function Shop() {
+  const router = useRouter();
   const { data: allProducts } = useSuspenseQuery(productsQuery());
   const products = useMemo(() => allProducts.filter((p) => p.category !== "Accessories"), [allProducts]);
   const [q, setQ] = useState("");
