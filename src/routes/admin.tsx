@@ -447,7 +447,9 @@ function SettingsTab() {
     const { error } = await supabase.from("site_settings").update({
       upi_id: s.upi_id, upi_qr_url: s.upi_qr_url, bank_details: s.bank_details,
       whatsapp_number: s.whatsapp_number, admin_email: s.admin_email,
-    }).eq("id", 1);
+      shipping_flat: (s as any).shipping_flat ?? 0,
+      shipping_free_above: (s as any).shipping_free_above ?? 0,
+    } as any).eq("id", 1);
     if (error) return toast.error(error.message);
     toast.success("Settings saved");
   };
@@ -459,6 +461,16 @@ function SettingsTab() {
       <Field label="Bank details"><textarea className="input min-h-32" value={s.bank_details ?? ""} onChange={(e) => upd("bank_details", e.target.value)} placeholder="Bank name&#10;Account number&#10;IFSC&#10;Beneficiary" /></Field>
       <Field label="WhatsApp number (with country code)"><input className="input" value={s.whatsapp_number ?? ""} onChange={(e) => upd("whatsapp_number", e.target.value)} /></Field>
       <Field label="Admin email"><input className="input" value={s.admin_email ?? ""} onChange={(e) => upd("admin_email", e.target.value)} /></Field>
+      <div className="grid grid-cols-2 gap-4">
+        <Field label="Shipping charge (₹)">
+          <input type="number" min={0} className="input" value={(s as any).shipping_flat ?? 0}
+            onChange={(e) => setS({ ...s, shipping_flat: Number(e.target.value) || 0 } as any)} />
+        </Field>
+        <Field label="Free shipping above (₹, 0 = never)">
+          <input type="number" min={0} className="input" value={(s as any).shipping_free_above ?? 0}
+            onChange={(e) => setS({ ...s, shipping_free_above: Number(e.target.value) || 0 } as any)} />
+        </Field>
+      </div>
       <button onClick={save} className="btn-primary"><Save className="h-4 w-4" /> Save settings</button>
     </div>
   );
