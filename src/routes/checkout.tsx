@@ -205,7 +205,7 @@ function Checkout() {
           <div className="mt-4 space-y-1 border-t border-border pt-4 text-sm">
             <Row l="Subtotal" v={`₹${subtotal}`} />
             {discount > 0 && <Row l={`Discount (${coupon?.code})`} v={`− ₹${discount}`} />}
-            <Row l="Shipping" v="Free" />
+            <Row l="Shipping" v={shipping === 0 ? "Free" : `₹${shipping}`} />
             <div className="mt-3 flex justify-between border-t border-border pt-3 font-serif text-xl">
               <span>Total</span><span>₹{total}</span>
             </div>
