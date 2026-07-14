@@ -17,14 +17,11 @@ export const Route = createFileRoute("/")({
 function Home() {
   const { data: products } = useSuspenseQuery(productsQuery());
   const featured = products.slice(0, 4);
-  const cat1 = products.find((p) => p.category === "Shirts") ?? products[0];
-  const cat2 = products.find((p) => p.category === "Kurtis") ?? products[1] ?? products[0];
   return (
     <>
       <Hero />
       <Marquee />
       <Featured products={featured} />
-      <Categories a={cat1} b={cat2} />
       <Craft />
       <Reviews />
       <Newsletter />
