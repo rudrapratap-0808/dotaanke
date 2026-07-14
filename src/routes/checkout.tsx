@@ -49,8 +49,14 @@ function Checkout() {
     return () => { alive = false; };
   }, [user, setValue]);
 
+  const { data: settings } = useQuery(settingsQuery());
   const discount = coupon ? Math.round((subtotal * coupon.percent) / 100) : 0;
-  const total = subtotal - discount;
+  const shipFlat = (settings as any)?.shipping_flat ?? 0;
+  const shipFree = (settings as any)?.shipping_free_above ?? 0;
+  const afterDiscount = subtotal - discount;
+  const shipping = cart.length === 0 ? 0 : (shipFree > 0 && afterDiscount >= shipFree ? 0 : shipFlat);
+  const total = afterDiscount + shipping;
+
 
   const onSubmit = async (data: Form) => {
     if (cart.length === 0) return toast.error("Your bag is empty");
