@@ -1,0 +1,1 @@
+ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS shipping_flat integer NOT NULL DEFAULT 0; ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS shipping_free_above integer NOT NULL DEFAULT 0;
