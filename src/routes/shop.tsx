@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, ArrowLeft } from "lucide-react";
 import { productsQuery } from "@/lib/api";
 import { ProductCard } from "@/components/ProductCard";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -17,6 +17,7 @@ export const Route = createFileRoute("/shop")({
 });
 
 function Shop() {
+  const router = useRouter();
   const { data: allProducts } = useSuspenseQuery(productsQuery());
   const products = useMemo(() => allProducts.filter((p) => p.category !== "Accessories"), [allProducts]);
   const [q, setQ] = useState("");
@@ -42,6 +43,14 @@ function Shop() {
   return (
     <section className="mx-auto max-w-7xl px-5 py-16 md:px-10">
       <header className="mb-10">
+        <button
+          onClick={() => router.history.back()}
+          className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-background/70 px-3 py-1.5 text-xs text-foreground/80 backdrop-blur transition-colors hover:border-primary hover:text-primary"
+          aria-label="Go back"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back
+        </button>
         <p className="eyebrow">The collection</p>
         <h1 className="mt-3 font-serif text-5xl md:text-6xl">Shop</h1>
         <p className="mt-3 max-w-xl text-muted-foreground">
