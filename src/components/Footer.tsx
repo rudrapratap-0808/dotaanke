@@ -17,36 +17,90 @@ export function Footer() {
             Every stitch tells a story. Hand-embroidered heirloom pieces for the modern Indian wardrobe.
           </p>
           <div className="mt-6 flex gap-3">
-            <a href="https://www.instagram.com/do_taanke/" target="_blank" rel="noreferrer" aria-label="Instagram" className="rounded-full border border-border p-2 transition-colors hover:border-primary hover:text-primary"><Instagram className="h-4 w-4" /></a>
-            <a href="https://wa.me/918619780142" target="_blank" rel="noreferrer" aria-label="WhatsApp" className="rounded-full border border-border p-2 transition-colors hover:border-primary hover:text-primary"><MessageCircle className="h-4 w-4" /></a>
+            <a
+              href="https://www.instagram.com/do_taanke/"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Instagram"
+              className="rounded-full border border-border p-2 transition-colors hover:border-primary hover:text-primary"
+            >
+              <Instagram className="h-4 w-4" />
+            </a>
+            <a
+              href="https://wa.me/918619780142"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="WhatsApp"
+              className="rounded-full border border-border p-2 transition-colors hover:border-primary hover:text-primary"
+            >
+              <MessageCircle className="h-4 w-4" />
+            </a>
           </div>
         </div>
 
         <div>
           <h4 className="eyebrow">Shop</h4>
           <ul className="mt-4 space-y-2 text-sm">
-            <li><Link to="/shop" className="gold-underline">All Products</Link></li>
-            <li><Link to="/shop" search={{ category: "Shirts" } as never} className="gold-underline">Embroidery Shirts</Link></li>
-            <li><Link to="/shop" search={{ category: "Kurtis" } as never} className="gold-underline">Embroidery Kurtis</Link></li>
-            <li><Link to="/accessories" className="gold-underline">Accessories</Link></li>
-            <li><Link to="/wishlist" className="gold-underline">Wishlist</Link></li>
+            <li>
+              <Link to="/shop" className="gold-underline">
+                All Products
+              </Link>
+            </li>
+            <li>
+              <Link to="/shop" search={{ category: "Shirts" } as never} className="gold-underline">
+                Embroidery Shirts
+              </Link>
+            </li>
+            <li>
+              <Link to="/shop" search={{ category: "Kurtis" } as never} className="gold-underline">
+                Embroidery Kurtis
+              </Link>
+            </li>
+            <li>
+              <Link to="/accessories" className="gold-underline">
+                Accessories
+              </Link>
+            </li>
+            <li>
+              <Link to="/wishlist" className="gold-underline">
+                Wishlist
+              </Link>
+            </li>
           </ul>
         </div>
 
         <div>
           <h4 className="eyebrow">Support</h4>
           <ul className="mt-4 space-y-2 text-sm">
-            <li><Link to="/faq" className="gold-underline">FAQ</Link></li>
-            <li><Link to="/contact" className="gold-underline">Contact</Link></li>
-            <li><Link to="/about" className="gold-underline">Our Story</Link></li>
-            <li className="flex items-center gap-2 text-muted-foreground"><Phone className="h-3.5 w-3.5" /> +91 76185 16284</li>
-            <li className="flex items-center gap-2 text-muted-foreground"><Mail className="h-3.5 w-3.5" /> support@dotaanke.store</li>
+            <li>
+              <Link to="/faq" className="gold-underline">
+                FAQ
+              </Link>
+            </li>
+            <li>
+              <Link to="/contact" className="gold-underline">
+                Contact
+              </Link>
+            </li>
+            <li>
+              <Link to="/about" className="gold-underline">
+                Our Story
+              </Link>
+            </li>
+            <li className="flex items-center gap-2 text-muted-foreground">
+              <Phone className="h-3.5 w-3.5" /> +91 86197 80142
+            </li>
+            <li className="flex items-center gap-2 text-muted-foreground">
+              <Mail className="h-3.5 w-3.5" /> support@dotaanke.store
+            </li>
           </ul>
         </div>
 
         <div>
           <h4 className="eyebrow">The Atelier Letter</h4>
-          <p className="mt-4 text-sm text-muted-foreground">New arrivals, private previews and 10% off your first order.</p>
+          <p className="mt-4 text-sm text-muted-foreground">
+            New arrivals, private previews and 10% off your first order.
+          </p>
           <form
             className="mt-4 flex gap-2"
             onSubmit={(e) => {
