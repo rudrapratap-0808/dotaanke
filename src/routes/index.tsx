@@ -113,45 +113,7 @@ function Featured({ products }: { products: import("@/lib/products").Product[] }
   );
 }
 
-function Categories({ a, b }: { a?: import("@/lib/products").Product; b?: import("@/lib/products").Product }) {
-  if (!a && !b) return null;
-  const cats = [
-    { title: "Embroidery Shirts", tag: "For Him", price: "From ₹799", img: a?.image ?? b?.image },
-    { title: "Embroidery Kurtis", tag: "For Her", price: "From ₹899", img: b?.image ?? a?.image },
-  ];
-  return (
-    <section className="py-24">
-      <SectionHeader eyebrow="Shop by category" title="Two worlds, one thread" />
-      <div className="mx-auto mt-12 grid max-w-7xl gap-6 px-5 md:grid-cols-2 md:px-10">
-        {cats.map((c, i) => (
-          <motion.div
-            key={c.title}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: i * 0.1 }}
-            className="group relative overflow-hidden rounded-2xl bg-cream"
-          >
-            {c.img && (
-              <img src={c.img} alt={c.title} className="h-[520px] w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105" loading="lazy" />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-foreground/10 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-8">
-              <p className="eyebrow text-background/80">{c.tag}</p>
-              <h3 className="mt-2 font-serif text-4xl text-background">{c.title}</h3>
-              <div className="mt-4 flex items-center justify-between">
-                <p className="text-sm text-background/80">{c.price}</p>
-                <Link to="/shop" className="rounded-full bg-background px-5 py-2 text-xs font-medium tracking-widest text-foreground transition-transform hover:scale-105">
-                  Explore
-                </Link>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </section>
-  );
-}
+
 
 function Craft() {
   return (
