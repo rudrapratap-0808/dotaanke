@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, ArrowLeft } from "lucide-react";
 import { productsQuery } from "@/lib/api";
 import { ProductCard } from "@/components/ProductCard";
 import { useSuspenseQuery } from "@tanstack/react-query";
