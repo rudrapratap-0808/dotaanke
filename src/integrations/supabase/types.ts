@@ -404,6 +404,8 @@ export type Database = {
           admin_email: string | null
           bank_details: string | null
           id: number
+          shipping_flat: number
+          shipping_free_above: number
           updated_at: string
           upi_id: string | null
           upi_qr_url: string | null
@@ -413,6 +415,8 @@ export type Database = {
           admin_email?: string | null
           bank_details?: string | null
           id?: number
+          shipping_flat?: number
+          shipping_free_above?: number
           updated_at?: string
           upi_id?: string | null
           upi_qr_url?: string | null
@@ -422,6 +426,8 @@ export type Database = {
           admin_email?: string | null
           bank_details?: string | null
           id?: number
+          shipping_flat?: number
+          shipping_free_above?: number
           updated_at?: string
           upi_id?: string | null
           upi_qr_url?: string | null

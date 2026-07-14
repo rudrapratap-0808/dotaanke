@@ -6,7 +6,8 @@ import { Loader2, ShieldCheck } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { buildWhatsappMessage } from "@/lib/api";
+import { buildWhatsappMessage, settingsQuery } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 
 
 export const Route = createFileRoute("/checkout")({
@@ -48,8 +49,14 @@ function Checkout() {
     return () => { alive = false; };
   }, [user, setValue]);
 
+  const { data: settings } = useQuery(settingsQuery());
   const discount = coupon ? Math.round((subtotal * coupon.percent) / 100) : 0;
-  const total = subtotal - discount;
+  const shipFlat = (settings as any)?.shipping_flat ?? 0;
+  const shipFree = (settings as any)?.shipping_free_above ?? 0;
+  const afterDiscount = subtotal - discount;
+  const shipping = cart.length === 0 ? 0 : (shipFree > 0 && afterDiscount >= shipFree ? 0 : shipFlat);
+  const total = afterDiscount + shipping;
+
 
   const onSubmit = async (data: Form) => {
     if (cart.length === 0) return toast.error("Your bag is empty");
@@ -198,7 +205,7 @@ function Checkout() {
           <div className="mt-4 space-y-1 border-t border-border pt-4 text-sm">
             <Row l="Subtotal" v={`₹${subtotal}`} />
             {discount > 0 && <Row l={`Discount (${coupon?.code})`} v={`− ₹${discount}`} />}
-            <Row l="Shipping" v="Free" />
+            <Row l="Shipping" v={shipping === 0 ? "Free" : `₹${shipping}`} />
             <div className="mt-3 flex justify-between border-t border-border pt-3 font-serif text-xl">
               <span>Total</span><span>₹{total}</span>
             </div>
