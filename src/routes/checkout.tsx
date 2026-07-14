@@ -6,7 +6,8 @@ import { Loader2, ShieldCheck } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { buildWhatsappMessage } from "@/lib/api";
+import { buildWhatsappMessage, settingsQuery } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 
 
 export const Route = createFileRoute("/checkout")({
