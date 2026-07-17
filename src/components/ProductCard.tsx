@@ -23,7 +23,10 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
             alt={product.name}
             width={1200}
             height={1500}
-            loading="lazy"
+            loading={index < 4 ? "eager" : "lazy"}
+            decoding="async"
+            fetchPriority={index < 2 ? "high" : "auto"}
+            sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
             className="h-full w-full object-cover transition-transform duration-[900ms] group-hover:scale-105"
           />
           <button
