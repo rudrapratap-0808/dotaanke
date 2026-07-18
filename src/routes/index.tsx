@@ -16,12 +16,14 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const { data: products } = useSuspenseQuery(productsQuery());
-  const featured = products.slice(0, 4);
+  const shopFeatured = products.filter((p) => p.category !== "Accessories").slice(0, 4);
+  const accessoriesFeatured = products.filter((p) => p.category === "Accessories").slice(0, 4);
   return (
     <>
       <Hero />
       <Marquee />
-      <Featured products={featured} />
+      <Featured products={shopFeatured} eyebrow="Best sellers" title="The heirlooms" cta={{ to: "/shop", label: "View all" }} />
+      <Featured products={accessoriesFeatured} eyebrow="The finishing touch" title="Accessories" cta={{ to: "/accessories", label: "View all" }} />
       <Craft />
       <Reviews />
       <Newsletter />
