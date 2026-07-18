@@ -16,12 +16,14 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const { data: products } = useSuspenseQuery(productsQuery());
-  const featured = products.slice(0, 4);
+  const shopFeatured = products.filter((p) => p.category !== "Accessories").slice(0, 4);
+  const accessoriesFeatured = products.filter((p) => p.category === "Accessories").slice(0, 4);
   return (
     <>
       <Hero />
       <Marquee />
-      <Featured products={featured} />
+      <Featured products={shopFeatured} eyebrow="Best sellers" title="The heirlooms" cta={{ to: "/shop", label: "View all" }} />
+      <Featured products={accessoriesFeatured} eyebrow="The finishing touch" title="Accessories" cta={{ to: "/accessories", label: "View all" }} />
       <Craft />
       <Reviews />
       <Newsletter />
@@ -101,11 +103,11 @@ function SectionHeader({ eyebrow, title, cta }: { eyebrow: string; title: string
   );
 }
 
-function Featured({ products }: { products: import("@/lib/products").Product[] }) {
+function Featured({ products, eyebrow, title, cta }: { products: import("@/lib/products").Product[]; eyebrow: string; title: string; cta?: { to: string; label: string } }) {
   if (products.length === 0) return null;
   return (
     <section className="py-24">
-      <SectionHeader eyebrow="Best sellers" title="The heirlooms" cta={{ to: "/shop", label: "View all" }} />
+      <SectionHeader eyebrow={eyebrow} title={title} cta={cta} />
       <div className="mx-auto mt-12 grid max-w-7xl grid-cols-2 gap-5 px-5 md:grid-cols-4 md:gap-8 md:px-10">
         {products.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
       </div>
