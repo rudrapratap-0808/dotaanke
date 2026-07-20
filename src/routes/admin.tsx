@@ -242,13 +242,26 @@ function ProductForm({ p, onChange, onCancel, onSave }: { p: Partial<Product>; o
         </Field>
 
         <Field label="Gallery images" full>
+          <p className="mb-2 text-xs text-muted-foreground">Drag to reorder, or use the arrows. First image shows first on the product page.</p>
           <div className="flex flex-wrap gap-3">
             {(p.gallery ?? []).map((url, i) => (
-              <div key={i} className="relative">
-                <img src={url} alt="" className="h-20 w-16 rounded object-cover" />
+              <div
+                key={`${url}-${i}`}
+                draggable
+                onDragStart={(e) => onDragStartGallery(e, i)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => onDropGallery(e, i)}
+                className="relative cursor-move"
+              >
+                <img src={url} alt="" className="h-20 w-16 rounded object-cover ring-1 ring-border" />
+                <span className="absolute left-1 top-1 rounded bg-black/60 px-1 text-[10px] font-medium text-white">{i + 1}</span>
                 <button type="button" onClick={() => removeGalleryAt(i)} className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground">
                   <Trash2 className="h-3 w-3" />
                 </button>
+                <div className="absolute inset-x-0 -bottom-2 flex justify-center gap-1">
+                  <button type="button" onClick={() => moveGallery(i, -1)} disabled={i === 0} className="rounded-full bg-background px-1.5 text-xs shadow ring-1 ring-border disabled:opacity-40">◀</button>
+                  <button type="button" onClick={() => moveGallery(i, 1)} disabled={i === (p.gallery ?? []).length - 1} className="rounded-full bg-background px-1.5 text-xs shadow ring-1 ring-border disabled:opacity-40">▶</button>
+                </div>
               </div>
             ))}
             <label className="btn-ghost cursor-pointer text-xs">
