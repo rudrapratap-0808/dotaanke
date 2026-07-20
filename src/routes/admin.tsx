@@ -196,6 +196,28 @@ function ProductForm({ p, onChange, onCancel, onSave }: { p: Partial<Product>; o
     upd("gallery", next);
   };
 
+  const moveGallery = (idx: number, dir: -1 | 1) => {
+    const next = [...(p.gallery ?? [])];
+    const target = idx + dir;
+    if (target < 0 || target >= next.length) return;
+    [next[idx], next[target]] = [next[target], next[idx]];
+    upd("gallery", next);
+  };
+
+  const onDragStartGallery = (e: React.DragEvent, idx: number) => {
+    e.dataTransfer.setData("text/plain", String(idx));
+    e.dataTransfer.effectAllowed = "move";
+  };
+  const onDropGallery = (e: React.DragEvent, target: number) => {
+    e.preventDefault();
+    const from = Number(e.dataTransfer.getData("text/plain"));
+    if (Number.isNaN(from) || from === target) return;
+    const next = [...(p.gallery ?? [])];
+    const [moved] = next.splice(from, 1);
+    next.splice(target, 0, moved);
+    upd("gallery", next);
+  };
+
   return (
     <div className="rounded-xl border border-border bg-cream p-6">
       <h2 className="font-serif text-2xl">{p.id ? "Edit product" : "New product"}</h2>
