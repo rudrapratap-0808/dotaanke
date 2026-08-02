@@ -69,6 +69,7 @@ function Checkout() {
         size: c.size,
         quantity: c.quantity,
         image: c.image,
+        customName: c.customName ?? null,
       }));
       const { data: inserted, error } = await supabase
         .from("orders")

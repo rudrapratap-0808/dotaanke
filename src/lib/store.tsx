@@ -9,13 +9,14 @@ export type CartItem = {
   image: string;
   size: string;
   quantity: number;
+  customName?: string;
 };
 
 type StoreContextValue = {
   cart: CartItem[];
   addToCart: (item: CartItem) => void;
-  updateQuantity: (productId: string, size: string, quantity: number) => void;
-  removeItem: (productId: string, size: string) => void;
+  updateQuantity: (productId: string, size: string, quantity: number, customName?: string) => void;
+  removeItem: (productId: string, size: string, customName?: string) => void;
   clearCart: () => void;
   subtotal: number;
   count: number;
@@ -82,7 +83,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       count,
       addToCart: (item) =>
         setState((s) => {
-          const existing = s.cart.find((c) => c.productId === item.productId && c.size === item.size);
+          const existing = s.cart.find(
+            (c) =>
+              c.productId === item.productId &&
+              c.size === item.size &&
+              (c.customName ?? "") === (item.customName ?? ""),
+          );
           if (existing) {
             return {
               ...s,
@@ -93,17 +99,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           }
           return { ...s, cart: [...s.cart, item] };
         }),
-      updateQuantity: (productId, size, quantity) =>
+      updateQuantity: (productId, size, quantity, customName) =>
         setState((s) => ({
           ...s,
           cart: s.cart
-            .map((c) => (c.productId === productId && c.size === size ? { ...c, quantity } : c))
+            .map((c) =>
+              c.productId === productId && c.size === size && (c.customName ?? "") === (customName ?? "")
+                ? { ...c, quantity }
+                : c,
+            )
             .filter((c) => c.quantity > 0),
         })),
-      removeItem: (productId, size) =>
+      removeItem: (productId, size, customName) =>
         setState((s) => ({
           ...s,
-          cart: s.cart.filter((c) => !(c.productId === productId && c.size === size)),
+          cart: s.cart.filter(
+            (c) =>
+              !(c.productId === productId && c.size === size && (c.customName ?? "") === (customName ?? "")),
+          ),
         })),
       clearCart: () => setState((s) => ({ ...s, cart: [], coupon: null })),
       isCartOpen,
