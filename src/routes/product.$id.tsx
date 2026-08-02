@@ -153,6 +153,23 @@ function ProductPage() {
             </div>
           )}
 
+          {isTshirt && (
+            <div className="mt-6">
+              <p className="eyebrow mb-3">Add your name (optional)</p>
+              <input
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value.slice(0, 20))}
+                maxLength={20}
+                placeholder="Name to print on the t-shirt"
+                aria-label="Custom name for t-shirt"
+                className="input w-full"
+              />
+              <p className="mt-2 text-xs text-muted-foreground">
+                {customName.length}/20 characters · printed exactly as typed
+              </p>
+            </div>
+          )}
+
 
           <div className="mt-6 flex items-center gap-3">
             <div className="flex items-center rounded-md border border-border">
