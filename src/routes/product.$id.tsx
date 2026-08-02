@@ -35,6 +35,7 @@ function ProductPage() {
   const { data: allProducts } = useSuspenseQuery(productsQuery());
   const [size, setSize] = useState("M");
   const [color, setColor] = useState<string>("");
+  const [customName, setCustomName] = useState("");
   const [qty, setQty] = useState(1);
   const [active, setActive] = useState(0);
   const [zoom, setZoom] = useState({ x: 50, y: 50, on: false });
@@ -43,19 +44,32 @@ function ProductPage() {
 
   if (!product) return null;
   const wished = wishlist.includes(product.id);
+  const isTshirt = /t-?shirt/i.test(product.category);
 
   useEffect(() => { addRecentlyViewed(product.id); }, [product.id, addRecentlyViewed]);
 
   const related = allProducts.filter((p) => p.id !== product.id).slice(0, 4);
 
+  const cartItem = () => ({
+    productId: product.id,
+    slug: product.slug,
+    name: product.name,
+    price: product.price,
+    image: product.image,
+    size,
+    quantity: qty,
+    ...(isTshirt && customName.trim() ? { customName: customName.trim() } : {}),
+  });
+
   const add = () => {
-    addToCart({ productId: product.id, slug: product.slug, name: product.name, price: product.price, image: product.image, size, quantity: qty });
+    addToCart(cartItem());
     openCart();
   };
   const buyNow = () => {
-    addToCart({ productId: product.id, slug: product.slug, name: product.name, price: product.price, image: product.image, size, quantity: qty });
+    addToCart(cartItem());
     navigate({ to: "/checkout" });
   };
+
 
   return (
     <section className="mx-auto max-w-7xl px-5 py-12 md:px-10">
