@@ -372,8 +372,11 @@ function OrdersTab() {
               <div>
                 <p className="eyebrow">Items</p>
                 <ul className="mt-2 space-y-1 text-sm">
-                  {(o.items as Array<{ name: string; size: string; quantity: number; price: number }>).map((i, idx) => (
-                    <li key={idx}>{i.name} — {i.size} × {i.quantity} — ₹{i.price * i.quantity}</li>
+                  {(o.items as Array<{ name: string; size: string; quantity: number; price: number; customName?: string | null }>).map((i, idx) => (
+                    <li key={idx}>
+                      {i.name} — {i.size} × {i.quantity} — ₹{i.price * i.quantity}
+                      {i.customName ? <span className="block text-xs font-medium text-primary">Custom name: {i.customName}</span> : null}
+                    </li>
                   ))}
                 </ul>
                 {o.payment_screenshot_url && (

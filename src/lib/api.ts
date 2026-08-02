@@ -75,7 +75,7 @@ export function buildWhatsappMessage(params: {
   city: string;
   state: string;
   pincode: string;
-  items: Array<{ name: string; size: string; quantity: number; price: number }>;
+  items: Array<{ name: string; size: string; quantity: number; price: number; customName?: string | null }>;
   total: number;
 }) {
   const lines = [
@@ -89,7 +89,10 @@ export function buildWhatsappMessage(params: {
     `🏠 Address: ${params.address}, ${params.city}, ${params.state} - ${params.pincode}`,
     ``,
     `🛍️ Items:`,
-    ...params.items.map((i) => `• ${i.name} — Size ${i.size} × ${i.quantity} — ₹${i.price * i.quantity}`),
+    ...params.items.map(
+      (i) =>
+        `• ${i.name} — Size ${i.size} × ${i.quantity} — ₹${i.price * i.quantity}${i.customName ? ` — Custom name: ${i.customName}` : ""}`,
+    ),
     ``,
     `💰 Total Paid: ₹${params.total}`,
     ``,
