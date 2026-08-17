@@ -10,6 +10,16 @@ import { toast } from "sonner";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "दो Taanke — Hand-Embroidered Indian Fashion" },
+      { name: "description", content: "Discover handcrafted Indian clothing and accessories by दो Taanke, where modern silhouettes meet heirloom embroidery." },
+      { property: "og:title", content: "दो Taanke — Hand-Embroidered Indian Fashion" },
+      { property: "og:description", content: "Discover handcrafted Indian clothing and accessories by दो Taanke, where modern silhouettes meet heirloom embroidery." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   loader: ({ context }) => context.queryClient.ensureQueryData(productsQuery()),
   component: Home,
 });

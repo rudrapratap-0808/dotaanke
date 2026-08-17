@@ -13,13 +13,19 @@ export async function fetchProducts(): Promise<Product[]> {
     .select("*")
     .eq("active", true)
     .order("created_at", { ascending: false });
-  if (error) throw error;
+  if (error) {
+    console.warn("Product catalog is temporarily unavailable", error.message);
+    return [];
+  }
   return (data ?? []).map(toProduct);
 }
 
 export async function fetchProductBySlug(slug: string): Promise<Product | null> {
   const { data, error } = await supabase.from("products").select("*").eq("slug", slug).maybeSingle();
-  if (error) throw error;
+  if (error) {
+    console.warn("Product details are temporarily unavailable", error.message);
+    return null;
+  }
   return data ? toProduct(data) : null;
 }
 
@@ -59,10 +65,10 @@ export async function fetchMyOrders(userId: string): Promise<Order[]> {
 }
 
 export const productsQuery = () =>
-  queryOptions({ queryKey: ["products"], queryFn: fetchProducts, staleTime: 30_000 });
+  queryOptions({ queryKey: ["products"], queryFn: fetchProducts, staleTime: 30_000, retry: false });
 
 export const productBySlugQuery = (slug: string) =>
-  queryOptions({ queryKey: ["product", slug], queryFn: () => fetchProductBySlug(slug), staleTime: 30_000 });
+  queryOptions({ queryKey: ["product", slug], queryFn: () => fetchProductBySlug(slug), staleTime: 30_000, retry: false });
 
 export const settingsQuery = () =>
   queryOptions({ queryKey: ["settings"], queryFn: fetchSettings, staleTime: 60_000 });
